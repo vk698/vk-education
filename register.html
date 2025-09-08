@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - StudyHub</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #ff6b6b;
+            --dark: #2c3e50;
+            --light: #f0f4f8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .signup-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 0.5rem;
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #3a5a80;
+        }
+        
+        .login-link {
+            margin-top: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .error {
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo">
+            <i>📚</i> StudyHub
+        </div>
+        <h1>Create Your Account</h1>
+        
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+                <div id="emailError" class="error">Email already registered</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" minlength="6" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="grade">Grade Level</label>
+                <select id="grade" required>
+                    <option value="">Select your grade</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                    <option value="college">College</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="subjects">Subjects of Interest</label>
+                <input type="text" id="subjects" placeholder="Math, Science, History, etc.">
+            </div>
+            
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+        
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const grade = document.getElementById('grade').value;
+            const subjects = document.getElementById('subjects').value;
+            
+            // Get existing users or initialize empty array
+            const users = JSON.parse(localStorage.getItem('studyhub_users')) || [];
+            
+            // Check if email already exists
+            const emailExists = users.some(user => user.email === email);
+            if (emailExists) {
+                document.getElementById('emailError').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+            }
+            
+            // Create new user object
+            const newUser = {
+                id: Date.now().toString(),
+                fullname,
+                email,
+                password,
+                grade,
+                subjects: subjects ? subjects.split(',').map(s => s.trim()) : [],
+                avatar: fullname.charAt(0).toUpperCase(),
+                joined: new Date().toISOString(),
+                notesShared: 0,
+                forumPosts: 0
+            };
+            
+            // Save user to localStorage
+            users.push(newUser);
+            localStorage.setItem('studyhub_users', JSON.stringify(users));
+            
+            // Set as current user and redirect to profile
+            localStorage.setItem('studyhub_current_user', JSON.stringify(newUser));
+            alert('Registration successful! Welcome to StudyHub.');
+            window.location.href = 'profile.html';
+        });
+    </script>
+</body>
+</html>
