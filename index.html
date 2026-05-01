@@ -1506,12 +1506,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('threejs-container').appendChild(renderer.domElement);
             
-            // Add controls
+         
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             
-            // Add lights
+          
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             
@@ -1519,16 +1519,16 @@
             directionalLight.position.set(1, 1, 1);
             scene.add(directionalLight);
             
-            // Create learning environment
+          
             createLearningEnvironment();
             
-            // Handle window resize
+           
             window.addEventListener('resize', onWindowResize);
         }
         
-        // Create 3D learning environment
+        
         function createLearningEnvironment() {
-            // Create a central platform
+            
             const platformGeometry = new THREE.CircleGeometry(3, 32);
             const platformMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x4a6fa5,
@@ -1539,7 +1539,7 @@
             platform.rotation.x = -Math.PI / 2;
             scene.add(platform);
             
-            // Create subject pillars around the platform
+           
             const subjects = ['Math', 'Science', 'History', 'Language'];
             const colors = [0xff6b6b, 0x4CAF50, 0xFF9800, 0x9C27B0];
             const icons = ['fa-square-root-alt', 'fa-flask', 'fa-landmark', 'fa-language'];
@@ -1584,7 +1584,7 @@
                 scene.add(icon);
             });
             
-            // Add floating particles representing knowledge
+           
             const particlesGeometry = new THREE.BufferGeometry();
             const particleCount = 1000;
             
@@ -1613,7 +1613,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
-        // Animation loop
+        
         function animate() {
             requestAnimationFrame(animate);
             
@@ -1623,14 +1623,14 @@
             }
         }
         
-        // Show content overlay in 3D mode
+       
         function showOverlay(title, content) {
             document.getElementById('overlayTitle').textContent = title;
             document.getElementById('overlayContent').innerHTML = content;
             document.getElementById('contentOverlay').style.display = 'block';
         }
         
-        // Add user avatar to 3D scene
+        
         function addUserAvatar(user) {
             const avatarGeometry = new THREE.SphereGeometry(0.2, 32, 32);
             const avatarMaterial = new THREE.MeshBasicMaterial({ 
@@ -1640,7 +1640,7 @@
             avatar.position.set(0, 0.2, 0);
             scene.add(avatar);
             
-            // Add username label
+          
             const loader = new THREE.TextureLoader();
             const canvas = document.createElement('canvas');
             canvas.width = 256;
@@ -1665,17 +1665,17 @@
             scene.add(label);
         }
         
-        // DOM Content Loaded
+      
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize 3D scene
+            
             init3DScene();
             animate();
             
-            // Check if user is logged in
+           
             const currentUser = JSON.parse(localStorage.getItem('studyhub_current_user'));
             const isLoggedIn = currentUser !== null;
             
-            // Update UI based on login status
+            
             if (isLoggedIn) {
                 document.getElementById('authButtons').style.display = 'none';
                 document.getElementById('profileContainer').style.display = 'block';
