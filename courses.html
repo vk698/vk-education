@@ -1,0 +1,3222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub | Immersive AI-Powered 3D Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Three.js and other required libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        /* ===== PROFESSIONAL DESIGN SYSTEM ===== */
+        :root {
+            /* Color Palette */
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #ec4899;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --premium: linear-gradient(135deg, #f59e0b, #f97316);
+            --certificate: linear-gradient(135deg, #8b5cf6, #6366f1);
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            
+            /* Typography */
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+
+        /* ===== LAYOUT COMPONENTS ===== */
+        .app-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .courses-sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            padding: var(--space-lg);
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Main Content */
+        .three-d-container {
+            position: relative;
+            background: linear-gradient(135deg, #f0f4ff 0%, #fdf2ff 100%);
+        }
+
+        /* ===== COURSE CARDS ===== */
+        .course-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .course-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* Badges */
+        .course-badge {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-free {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-premium {
+            background: var(--premium);
+            color: #000;
+        }
+
+        .badge-upcoming {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Progress Tracking */
+        .progress-ring {
+            position: absolute;
+            top: var(--space-sm);
+            left: var(--space-sm);
+            width: 40px;
+            height: 40px;
+        }
+
+        .progress-circle {
+            stroke: var(--primary);
+            stroke-width: 4;
+            stroke-linecap: round;
+            fill: none;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Course Content */
+        .course-content {
+            padding: var(--space-md);
+        }
+
+        .course-title {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--dark);
+        }
+
+        .course-description {
+            color: var(--gray);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-md);
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .course-duration {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        /* Action Buttons */
+        .course-actions .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-enroll {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-enroll:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-premium {
+            background: var(--premium);
+            color: black;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-notify {
+            background: white;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        .btn-details {
+            background: var(--dark);
+            color: white;
+            border: none;
+        }
+
+        .btn-details:hover {
+            background: #334155;
+        }
+
+        /* Instructor Button */
+        .instructor-btn {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            background: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: var(--primary);
+        }
+
+        /* Certificate Button */
+        .certificate-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Syllabus Button */
+        .syllabus-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* ===== MODALS ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* ===== 3D NAVIGATION ===== */
+        .three-d-controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.75rem;
+            background: rgba(255,255,255,0.9);
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: var(--dark);
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ===== 3D SYLLABUS PREVIEW ===== */
+        .syllabus-preview {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: none;
+        }
+
+        .syllabus-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .syllabus-item:hover {
+            background: #f1f5f9;
+            transform: translateX(5px);
+        }
+
+        /* ===== COUNTDOWN TIMER ===== */
+        .countdown-timer {
+            font-family: 'Space Mono', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        /* ===== NEW AI FEATURES STYLES ===== */
+        /* AI Tutor Chat */
+        .ai-tutor-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 100;
+            transform: translateY(calc(100% - 50px));
+            transition: transform 0.3s ease;
+        }
+
+        .ai-tutor-widget.active {
+            transform: translateY(0);
+        }
+
+        .ai-tutor-header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .ai-tutor-body {
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8fafc;
+        }
+
+        .ai-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 80%;
+            font-size: 14px;
+        }
+
+        .ai-message.user {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message.bot {
+            background: white;
+            color: var(--dark);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ai-tutor-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .ai-tutor-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .ai-tutor-input button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        /* Virtual Study Room */
+        .study-room-modal {
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        .study-room-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            height: 600px;
+        }
+
+        .study-room-view {
+            background: #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .study-room-controls {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .study-room-sidebar {
+            background: white;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .participant-list {
+            margin-top: 15px;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Skill Radar Chart */
+        .skill-radar-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        /* Brain Visualization */
+        .brain-visualization {
+            width: 100%;
+            height: 400px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        /* AR Button */
+        .ar-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Voice Control Indicator */
+        .voice-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s;
+        }
+
+        .voice-indicator.active {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Mindmap Container */
+        .mindmap-container {
+            width: 100%;
+            height: 400px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Heatmap Visualization */
+        .heatmap-container {
+            width: 100%;
+            height: 400px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        /* Payment Modal */
+        .payment-modal {
+            max-width: 500px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .payment-method {
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .payment-method i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .payment-method.active {
+            border-color: var(--primary);
+            background: #f0f4ff;
+        }
+
+        .upi-id {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .upi-id span {
+            flex: 1;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Course Details Modal */
+        .course-details-modal {
+            max-width: 800px;
+        }
+
+        .course-details-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .course-details-image {
+            width: 200px;
+            height: 120px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .course-details-content {
+            flex: 1;
+        }
+
+        .course-details-meta {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .course-details-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .course-details-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .course-details-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .course-details-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .course-details-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .courses-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: 20;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .courses-sidebar.active {
+                transform: translateX(0);
+            }
+
+            .ai-tutor-widget {
+                width: 100%;
+                right: 0;
+                bottom: 0;
+                border-radius: 15px 15px 0 0;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .course-details-header {
+                flex-direction: column;
+            }
+
+            .course-details-image {
+                width: 100%;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Courses Sidebar -->
+        <aside class="courses-sidebar" id="coursesSidebar">
+            <div class="sidebar-header">
+                <h2 style="font-size: var(--text-2xl); font-weight: 700;">Course Explorer</h2>
+                <button id="closeSidebar" style="display: none; background: none; border: none; font-size: 1.25rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Search and Filters -->
+            <div style="margin-bottom: var(--space-lg);">
+                <div style="position: relative; margin-bottom: var(--space-md);">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray);"></i>
+                    <input type="text" placeholder="Search courses..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 8px; border: 1px solid #e2e8f0; font-size: var(--text-base);">
+                </div>
+                
+                <div style="display: flex; gap: var(--space-xs); margin-bottom: var(--space-md);">
+                    <button style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--primary); color: white; border: none; font-size: 0.875rem;">All</button>
+                    <button style="padding: 0.5rem 1rem; border-radius: 6px; background: #e2e8f0; border: none; font-size: 0.875rem;">Free</button>
+                    <button style="padding: 0.5rem 1rem; border-radius: 6px; background: #e2e8f0; border: none; font-size: 0.875rem;">Premium</button>
+                </div>
+            </div>
+
+            <!-- Course List -->
+            <div class="course-grid">
+                <!-- Free Course -->
+                <div class="course-card">
+                    <div class="course-image" style="background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
+                        <span class="course-badge badge-free">Free</span>
+                        <div class="progress-ring">
+                            <svg width="40" height="40">
+                                <circle cx="20" cy="20" r="16" stroke="#e2e8f0" stroke-width="4" fill="none"/>
+                                <circle class="progress-circle" cx="20" cy="20" r="16" stroke-dasharray="100.48" stroke-dashoffset="30.144"/>
+                                <text x="20" y="23" text-anchor="middle" font-size="10" fill="var(--dark)" font-weight="bold">70%</text>
+                            </svg>
+                        </div>
+                        <div class="instructor-btn" title="Meet Instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="certificate-btn" title="View Certificate">
+                            <i class="fas fa-award"></i>
+                            <span>Certificate</span>
+                        </div>
+                        <div class="syllabus-btn" title="3D Syllabus">
+                            <i class="fas fa-cube"></i>
+                            <span>Syllabus</span>
+                        </div>
+                        <button class="ar-button" id="mathARButton">
+                            <i class="fas fa-vr-cardboard"></i> View in AR
+                        </button>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Mathematics Fundamentals</h3>
+                        <p class="course-description">Master algebra, geometry, and calculus through interactive 3D visualizations and problem-solving.</p>
+                        <div class="course-meta">
+                            <span class="course-duration">
+                                <i class="far fa-clock"></i> 12 hours
+                            </span>
+                            <div class="course-actions">
+                                <button class="btn btn-enroll">Enroll Now</button>
+                                <button class="btn btn-details">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Course -->
+                <div class="course-card">
+                    <div class="course-image" style="background-image: url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
+                        <span class="course-badge badge-premium">Premium</span>
+                        <div class="progress-ring">
+                            <svg width="40" height="40">
+                                <circle cx="20" cy="20" r="16" stroke="#e2e8f0" stroke-width="4" fill="none"/>
+                                <circle class="progress-circle" cx="20" cy="20" r="16" stroke-dasharray="100.48" stroke-dashoffset="70.336"/>
+                                <text x="20" y="23" text-anchor="middle" font-size="10" fill="var(--dark)" font-weight="bold">30%</text>
+                            </svg>
+                        </div>
+                        <div class="instructor-btn" title="Meet Instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="certificate-btn" title="View Certificate">
+                            <i class="fas fa-award"></i>
+                            <span>Certificate</span>
+                        </div>
+                        <div class="syllabus-btn" title="3D Syllabus">
+                            <i class="fas fa-cube"></i>
+                            <span>Syllabus</span>
+                        </div>
+                        <button class="ar-button" id="scienceARButton">
+                            <i class="fas fa-vr-cardboard"></i> View in AR
+                        </button>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Data Science Masterclass</h3>
+                        <p class="course-description">Learn data analysis, machine learning, and visualization with Python in our comprehensive course.</p>
+                        <div class="course-meta">
+                            <span class="course-duration">
+                                <i class="far fa-clock"></i> 30 hours
+                            </span>
+                            <div class="course-actions">
+                                <button class="btn btn-premium">$89.99</button>
+                                <button class="btn btn-details">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Course -->
+                <div class="course-card">
+                    <div class="course-image" style="background-image: url('https://images.unsplash.com/photo-1629904853893-c2c8981a1dc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');">
+                        <span class="course-badge badge-upcoming">Coming <span class="countdown-timer">14d 06h 22m</span></span>
+                        <div class="instructor-btn" title="Preview Instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="syllabus-btn" title="Preview Syllabus">
+                            <i class="fas fa-cube"></i>
+                            <span>Syllabus</span>
+                        </div>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">Quantum Computing</h3>
+                        <p class="course-description">Explore the future of computing with interactive quantum circuit simulations and algorithms.</p>
+                        <div class="course-meta">
+                            <span class="course-duration">
+                                <i class="far fa-clock"></i> 18 hours
+                            </span>
+                            <div class="course-actions">
+                                <button class="btn btn-notify">Notify Me</button>
+                                <button class="btn btn-details">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations Section -->
+                <div style="margin-top: var(--space-lg);">
+                    <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-md);">Recommended For You</h3>
+                    <div id="aiRecommendations" class="course-grid"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 3D Viewport -->
+        <main class="three-d-container" id="threeDContainer">
+            <!-- 3D Controls -->
+            <div class="three-d-controls">
+                <button class="control-btn" id="mathControl">
+                    <i class="fas fa-square-root-alt"></i>
+                </button>
+                <button class="control-btn" id="scienceControl">
+                    <i class="fas fa-flask"></i>
+                </button>
+                <button class="control-btn" id="techControl">
+                    <i class="fas fa-laptop-code"></i>
+                </button>
+                <button class="control-btn" id="resetView">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="control-btn" id="voiceControlBtn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="control-btn" id="studyRoomBtn">
+                    <i class="fas fa-users"></i>
+                </button>
+            </div>
+
+            <!-- Brain Visualization Container -->
+            <div id="brainVisualization" class="brain-visualization" style="display: none;"></div>
+
+            <!-- Skill Radar Container -->
+            <div id="skillRadar" class="skill-radar-container" style="display: none;"></div>
+
+            <!-- Mindmap Container -->
+            <div id="mindmapContainer" class="mindmap-container" style="display: none;"></div>
+
+            <!-- Heatmap Container -->
+            <div id="heatmapContainer" class="heatmap-container" style="display: none;"></div>
+        </main>
+    </div>
+
+    <!-- AI Tutor Chat Widget -->
+    <div class="ai-tutor-widget" id="aiTutorWidget">
+        <div class="ai-tutor-header" id="aiTutorHeader">
+            <div>
+                <i class="fas fa-robot"></i> AI Tutor Assistant
+            </div>
+            <div>
+                <i class="fas fa-chevron-up" id="aiTutorToggle"></i>
+            </div>
+        </div>
+        <div class="ai-tutor-body" id="aiTutorBody">
+            <div class="ai-message bot">
+                Hello! I'm your AI tutor. How can I help you with your studies today? You can ask me about:
+                <ul style="margin-top: 5px; padding-left: 20px;">
+                    <li>Course concepts and explanations</li>
+                    <li>Problem solving strategies</li>
+                    <li>Study tips and techniques</li>
+                    <li>Learning progress tracking</li>
+                </ul>
+            </div>
+        </div>
+        <div class="ai-tutor-input">
+            <input type="text" id="aiTutorInput" placeholder="Ask me anything...">
+            <button id="aiTutorSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Voice Control Indicator -->
+    <div class="voice-indicator" id="voiceIndicator">
+        <i class="fas fa-microphone"></i>
+    </div>
+
+    <!-- Instructor Modal -->
+    <div class="modal" id="instructorModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeInstructorModal">×</button>
+            <div style="position:relative; padding-top:56.25%; background:#000;">
+                <video controls style="position:absolute; top:0; left:0; width:100%; height:100%;">
+                    <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div style="padding:20px;">
+                <h3 style="margin-bottom:10px;">Meet Your Instructor</h3>
+                <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
+                    <div>
+                        <h4 style="font-weight:600;">Dr. Sarah Johnson</h4>
+                        <p style="color:#64748b; font-size:14px;">PhD in Mathematics, Stanford University</p>
+                    </div>
+                </div>
+                <p style="color:#64748b; font-size:14px;">With over 10 years of teaching experience, Dr. Johnson specializes in making complex mathematical concepts accessible through interactive 3D visualizations.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="modal" id="certificateModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeCertificateModal">×</button>
+            <div style="padding:20px; text-align:center;">
+                <h3 style="margin-bottom:20px;">Your Course Certificate</h3>
+                <div id="certificate3DView" style="width:100%; height:400px; background:#f1f5f9; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                    <!-- 3D Certificate will be rendered here -->
+                    <p style="color:#64748b;">Loading 3D certificate...</p>
+                </div>
+                <div style="margin-top:20px;">
+                    <button style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">
+                        <i class="fas fa-download"></i> Download Certificate
+                    </button>
+                    <button style="padding:10px 20px; background:white; color:var(--primary); border:1px solid var(--primary); border-radius:6px; cursor:pointer; margin-left:10px;">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Syllabus Modal -->
+    <div class="modal" id="syllabusModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeSyllabusModal">×</button>
+            <div style="padding:20px;">
+                <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-cube" style="color:var(--primary);"></i>
+                    Interactive 3D Syllabus
+                </h3>
+                <div style="display:grid; grid-template-columns: 300px 1fr; gap:20px;">
+                    <div>
+                        <h4 style="margin-bottom:10px;">Course Modules</h4>
+                        <div style="background:#f1f5f9; border-radius:8px; padding:10px;">
+                            <div class="syllabus-item" data-module="1">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span>1. Algebra Fundamentals</span>
+                                    <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                                </div>
+                            </div>
+                            <div class="syllabus-item" data-module="2">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span>2. 3D Geometry</span>
+                                    <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                                </div>
+                            </div>
+                            <div class="syllabus-item" data-module="3">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span>3. Calculus Concepts</span>
+                                    <i class="fas fa-spinner" style="color:var(--warning);"></i>
+                                </div>
+                            </div>
+                            <div class="syllabus-item" data-module="4">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span>4. Advanced Topics</span>
+                                    <i class="far fa-circle" style="color:#cbd5e1;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="syllabus3DView" style="background:#f1f5f9; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <!-- 3D Syllabus visualization will be rendered here -->
+                        <p style="color:#64748b; text-align:center;">Select a module to view<br>3D interactive content</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Virtual Study Room Modal -->
+    <div class="modal" id="studyRoomModal">
+        <div class="modal-content study-room-modal">
+            <button class="close-modal" id="closeStudyRoomModal">×</button>
+            <div class="study-room-container">
+                <div class="study-room-view" id="studyRoomView">
+                    <!-- 3D Study Room will be rendered here -->
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+                        <p style="color:#64748b;">Loading virtual study room...</p>
+                    </div>
+                    <div class="study-room-controls">
+                        <button class="control-btn" id="raiseHandBtn">
+                            <i class="fas fa-hand-paper"></i>
+                        </button>
+                        <button class="control-btn" id="muteBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="control-btn" id="videoBtn">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="control-btn" id="leaveRoomBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="study-room-sidebar">
+                    <h3>Study Room: Math Fundamentals</h3>
+                    <p>Currently studying: Algebra Concepts</p>
+                    
+                    <div class="participant-list" id="participantList">
+                        <h4>Participants (3)</h4>
+                        <div class="participant-item">
+                            <div class="participant-avatar">Y</div>
+                            <div>
+                                <div>You</div>
+                                <small style="color:#64748b;">Host</small>
+                            </div>
+                        </div>
+                        <div class="participant-item">
+                            <div class="participant-avatar" style="background:var(--secondary);">A</div>
+                            <div>
+                                <div>Alex</div>
+                                <small style="color:#64748b;">Active</small>
+                            </div>
+                        </div>
+                        <div class="participant-item">
+                            <div class="participant-avatar" style="background:var(--success);">M</div>
+                            <div>
+                                <div>Maria</div>
+                                <small style="color:#64748b;">Muted</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:20px;">
+                        <h4>Shared Notes</h4>
+                        <textarea style="width:100%; height:100px; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-top:8px;" placeholder="Type shared notes here..."></textarea>
+                        <button style="width:100%; padding:8px; margin-top:8px; background:var(--primary); color:white; border:none; border-radius:6px;">Save Notes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Timeline Modal -->
+    <div class="modal" id="timelineModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeTimelineModal">×</button>
+            <div style="padding:20px;">
+                <h3 style="margin-bottom:15px;">
+                    <i class="fas fa-history" style="color:var(--primary); margin-right:10px;"></i>
+                    Your Learning Timeline
+                </h3>
+                <div id="knowledgeTimeline" style="width:100%; height:500px; background:#f1f5f9; border-radius:8px;">
+                    <!-- 3D Timeline will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VR Exam Modal -->
+    <div class="modal" id="examModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeExamModal">×</button>
+            <div style="padding:20px;">
+                <h3 style="margin-bottom:15px;">
+                    <i class="fas fa-vr-cardboard" style="color:var(--primary); margin-right:10px;"></i>
+                    Exam Simulation
+                </h3>
+                <div id="examSimulation" style="width:100%; height:500px; background:#f1f5f9; border-radius:8px; position:relative;">
+                    <!-- VR Exam will be rendered here -->
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+                        <h4 style="margin-bottom:10px;">Ready to start your exam?</h4>
+                        <p style="color:#64748b; margin-bottom:20px;">This simulation will recreate exam conditions to help you prepare.</p>
+                        <button style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">
+                            Start Exam Simulation
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-top:20px;">
+                    <h4>Exam Settings</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px;">
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">Environment</label>
+                            <select style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                                <option>Classroom</option>
+                                <option>Library</option>
+                                <option>Home Office</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">Duration</label>
+                            <select style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                                <option>30 minutes</option>
+                                <option>60 minutes</option>
+                                <option>90 minutes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">Difficulty</label>
+                            <select style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                                <option>Easy</option>
+                                <option>Medium</option>
+                                <option>Hard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">Distractions</label>
+                            <select style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                                <option>None</option>
+                                <option>Low</option>
+                                <option>Moderate</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content payment-modal">
+            <button class="close-modal" id="closePaymentModal">×</button>
+            <div style="padding:20px;">
+                <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-credit-card" style="color:var(--primary);"></i>
+                    Complete Your Purchase
+                </h3>
+                
+                <div style="background:#f1f5f9; padding:15px; border-radius:8px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span>Course:</span>
+                        <span style="font-weight:600;">Data Science Masterclass</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Amount:</span>
+                        <span style="font-weight:600;">$89.99</span>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom:15px;">Select Payment Method</h4>
+                
+                <div class="payment-methods">
+                    <div class="payment-method active" data-method="upi">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>UPI Payment</div>
+                    </div>
+                    <div class="payment-method" data-method="card">
+                        <i class="far fa-credit-card"></i>
+                        <div>Credit/Debit Card</div>
+                    </div>
+                </div>
+                
+                <div id="upiPayment" style="display:block;">
+                    <p style="margin-bottom:15px;">Complete payment using any UPI app by sending money to:</p>
+                    
+                    <div class="upi-id">
+                        <i class="fas fa-qrcode" style="margin-right:10px;"></i>
+                        <span>8789297252@paytm</span>
+                        <button class="copy-btn" id="copyUpiBtn">Copy</button>
+                    </div>
+                    
+                    <p style="margin-top:15px; color:#64748b; font-size:0.875rem;">
+                        <i class="fas fa-info-circle"></i> Payment will be verified automatically within 2 minutes
+                    </p>
+                </div>
+                
+                <div id="cardPayment" style="display:none;">
+                    <div style="margin:15px 0;">
+                        <label style="display:block; margin-bottom:5px; color:#64748b;">Card Number</label>
+                        <input type="text" placeholder="1234 5678 9012 3456" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px;">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">Expiry Date</label>
+                            <input type="text" placeholder="MM/YY" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:5px; color:#64748b;">CVV</label>
+                            <input type="text" placeholder="123" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block; margin-bottom:5px; color:#64748b;">Name on Card</label>
+                        <input type="text" placeholder="John Doe" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px;">
+                    </div>
+                </div>
+                
+                <button style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer; margin-top:20px;">
+                    Complete Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Details Modal -->
+    <div class="modal" id="courseDetailsModal">
+        <div class="modal-content course-details-modal">
+            <button class="close-modal" id="closeCourseDetailsModal">×</button>
+            <div style="padding:20px;">
+                <div class="course-details-header">
+                    <div class="course-details-image" id="courseDetailsImage"></div>
+                    <div class="course-details-content">
+                        <h3 id="courseDetailsTitle">Course Title</h3>
+                        <p id="courseDetailsDescription" style="color:#64748b; margin-bottom:10px;">Course description will appear here</p>
+                        
+                        <div class="course-details-meta">
+                            <div class="course-details-meta-item">
+                                <i class="far fa-clock"></i>
+                                <span id="courseDetailsDuration">12 hours</span>
+                            </div>
+                            <div class="course-details-meta-item">
+                                <i class="fas fa-user-graduate"></i>
+                                <span id="courseDetailsLevel">Beginner</span>
+                            </div>
+                            <div class="course-details-meta-item">
+                                <i class="fas fa-star"></i>
+                                <span id="courseDetailsRating">4.8 (120)</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top:15px;">
+                            <button class="btn btn-enroll" id="enrollFromDetails" style="margin-right:10px;">Enroll Now</button>
+                            <button class="btn btn-premium" id="buyFromDetails" style="display:none;">$89.99</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="course-details-tabs">
+                    <div class="course-details-tab active" data-tab="overview">Overview</div>
+                    <div class="course-details-tab" data-tab="curriculum">Curriculum</div>
+                    <div class="course-details-tab" data-tab="instructor">Instructor</div>
+                    <div class="course-details-tab" data-tab="reviews">Reviews</div>
+                </div>
+                
+                <div class="course-details-body" id="courseDetailsBody">
+                    <!-- Tab content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Implementation -->
+    <script>
+        // ===== MAIN 3D SCENE =====
+        let scene, camera, renderer, controls;
+        let certificateScene, certificateCamera, certificateRenderer;
+        let syllabusScene, syllabusCamera, syllabusRenderer;
+        let studyRoomScene, studyRoomCamera, studyRoomRenderer;
+        let brainScene, brainCamera, brainRenderer;
+        let timelineScene, timelineCamera, timelineRenderer;
+        let examScene, examCamera, examRenderer;
+        
+        // Course objects in 3D space
+        const courses3D = [
+            {
+                id: 'math',
+                position: { x: -3, y: 1, z: 0 },
+                color: 0x2563eb,
+                icon: 'square-root-alt'
+            },
+            {
+                id: 'science',
+                position: { x: 0, y: 1, z: -3 },
+                color: 0x10b981,
+                icon: 'flask'
+            },
+            {
+                id: 'tech',
+                position: { x: 3, y: 1, z: 0 },
+                color: 0xec4899,
+                icon: 'laptop-code'
+            }
+        ];
+        
+        // AI Recommendations
+        const recommendedCourses = [
+            { 
+                name: "Advanced Calculus", 
+                match: 92,
+                image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+                duration: "15 hours",
+                description: "Dive deeper into mathematical concepts with advanced problem-solving techniques.",
+                price: 0,
+                type: "free"
+            },
+            { 
+                name: "Physics Fundamentals", 
+                match: 87,
+                image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+                duration: "18 hours",
+                description: "Understand the fundamental laws of physics through interactive simulations.",
+                price: 49.99,
+                type: "premium"
+            }
+        ];
+
+        // Course details data
+        const courseDetails = {
+            "Mathematics Fundamentals": {
+                image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+                description: "Master algebra, geometry, and calculus through interactive 3D visualizations and problem-solving.",
+                duration: "12 hours",
+                level: "Beginner to Intermediate",
+                rating: "4.7 (245 reviews)",
+                price: 0,
+                type: "free",
+                overview: `
+                    <p>This comprehensive mathematics course covers all the fundamental concepts you need to build a strong foundation in math. Through interactive 3D visualizations, real-world applications, and problem-solving exercises, you'll gain a deep understanding of key mathematical principles.</p>
+                    <h4 style="margin-top:15px;">What You'll Learn</h4>
+                    <ul style="margin-top:10px; padding-left:20px;">
+                        <li>Algebraic expressions and equations</li>
+                        <li>Geometric concepts and proofs</li>
+                        <li>Calculus fundamentals (limits, derivatives, integrals)</li>
+                        <li>Problem-solving strategies</li>
+                        <li>Mathematical reasoning and logic</li>
+                    </ul>
+                    <h4 style="margin-top:15px;">Prerequisites</h4>
+                    <p>Basic arithmetic knowledge is recommended.</p>
+                `,
+                curriculum: [
+                    { title: "Algebra Fundamentals", duration: "3 hours", completed: true },
+                    { title: "2D and 3D Geometry", duration: "4 hours", completed: true },
+                    { title: "Introduction to Calculus", duration: "3 hours", completed: false },
+                    { title: "Advanced Problem Solving", duration: "2 hours", completed: false }
+                ],
+                instructor: {
+                    name: "Dr. Sarah Johnson",
+                    bio: "PhD in Mathematics from Stanford University with over 10 years of teaching experience. Specializes in making complex mathematical concepts accessible through interactive learning methods.",
+                    image: "https://randomuser.me/api/portraits/women/44.jpg"
+                },
+                reviews: [
+                    { author: "Alex M.", rating: 5, comment: "The 3D visualizations made difficult concepts so much easier to understand!" },
+                    { author: "Priya K.", rating: 4, comment: "Excellent course structure and pacing. The instructor explains things very clearly." }
+                ]
+            },
+            "Data Science Masterclass": {
+                image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+                description: "Learn data analysis, machine learning, and visualization with Python in our comprehensive course.",
+                duration: "30 hours",
+                level: "Intermediate",
+                rating: "4.8 (189 reviews)",
+                price: 89.99,
+                type: "premium",
+                overview: `
+                    <p>This masterclass provides a complete introduction to data science, covering everything from basic data analysis to machine learning algorithms. You'll work with real datasets and build practical skills using Python and popular data science libraries.</p>
+                    <h4 style="margin-top:15px;">What You'll Learn</h4>
+                    <ul style="margin-top:10px; padding-left:20px;">
+                        <li>Data cleaning and preprocessing</li>
+                        <li>Exploratory data analysis</li>
+                        <li>Data visualization techniques</li>
+                        <li>Machine learning fundamentals</li>
+                        <li>Model evaluation and deployment</li>
+                    </ul>
+                    <h4 style="margin-top:15px;">Prerequisites</h4>
+                    <p>Basic programming knowledge (preferably Python) is recommended.</p>
+                `,
+                curriculum: [
+                    { title: "Python for Data Science", duration: "5 hours", completed: true },
+                    { title: "Data Analysis with Pandas", duration: "6 hours", completed: true },
+                    { title: "Data Visualization", duration: "5 hours", completed: false },
+                    { title: "Machine Learning Basics", duration: "8 hours", completed: false },
+                    { title: "Advanced Topics", duration: "6 hours", completed: false }
+                ],
+                instructor: {
+                    name: "Dr. Michael Chen",
+                    bio: "Data scientist with 8 years of industry experience at leading tech companies. Passionate about teaching practical data science skills.",
+                    image: "https://randomuser.me/api/portraits/men/32.jpg"
+                },
+                reviews: [
+                    { author: "Rahul P.", rating: 5, comment: "The best data science course I've taken. Very practical and hands-on." },
+                    { author: "Sophia L.", rating: 4, comment: "Great content, but some sections could use more examples." }
+                ]
+            },
+            "Quantum Computing": {
+                image: "https://images.unsplash.com/photo-1629904853893-c2c8981a1dc5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+                description: "Explore the future of computing with interactive quantum circuit simulations and algorithms.",
+                duration: "18 hours",
+                level: "Advanced",
+                rating: "Coming Soon",
+                price: 99.99,
+                type: "upcoming",
+                overview: `
+                    <p>This upcoming course will introduce you to the fascinating world of quantum computing. Through interactive simulations and hands-on exercises, you'll learn about quantum bits, gates, and algorithms that could revolutionize computing.</p>
+                    <h4 style="margin-top:15px;">What You'll Learn</h4>
+                    <ul style="margin-top:10px; padding-left:20px;">
+                        <li>Quantum mechanics fundamentals</li>
+                        <li>Qubits and quantum gates</li>
+                        <li>Quantum algorithms (Deutsch, Grover, Shor)</li>
+                        <li>Quantum error correction</li>
+                        <li>Applications of quantum computing</li>
+                    </ul>
+                    <h4 style="margin-top:15px;">Prerequisites</h4>
+                    <p>Strong background in linear algebra and basic computer science concepts.</p>
+                `,
+                curriculum: [
+                    { title: "Introduction to Quantum Mechanics", duration: "3 hours" },
+                    { title: "Quantum Bits and Gates", duration: "4 hours" },
+                    { title: "Quantum Algorithms", duration: "6 hours" },
+                    { title: "Quantum Error Correction", duration: "3 hours" },
+                    { title: "Future Applications", duration: "2 hours" }
+                ],
+                instructor: {
+                    name: "Dr. Emily Zhang",
+                    bio: "Quantum computing researcher with publications in leading physics journals. Currently working on quantum algorithms at a major research lab.",
+                    image: "https://randomuser.me/api/portraits/women/68.jpg"
+                },
+                reviews: []
+            }
+        };
+
+        // AI Tutor Knowledge Base
+        const aiTutorKnowledge = {
+            "algebra": `
+                <p>Algebra is a branch of mathematics that uses symbols and letters to represent numbers and quantities in formulas and equations. Here are the key concepts:</p>
+                <h4 style="margin-top:15px;">Basic Concepts</h4>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Variables:</strong> Symbols (usually letters) that represent unknown values</li>
+                    <li><strong>Expressions:</strong> Combinations of variables, numbers, and operations</li>
+                    <li><strong>Equations:</strong> Statements that two expressions are equal</li>
+                </ul>
+                <h4 style="margin-top:15px;">Solving Equations</h4>
+                <p>The goal is to isolate the variable on one side of the equation. You can:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Add or subtract the same value from both sides</li>
+                    <li>Multiply or divide both sides by the same non-zero value</li>
+                    <li>Apply inverse operations to simplify</li>
+                </ul>
+                <h4 style="margin-top:15px;">Example Problem</h4>
+                <p>Solve for x: 3x + 5 = 20</p>
+                <p><strong>Solution:</strong></p>
+                <p>1. Subtract 5 from both sides: 3x = 15</p>
+                <p>2. Divide both sides by 3: x = 5</p>
+            `,
+            "geometry": `
+                <p>Geometry is the study of shapes, sizes, and properties of space. Here are the fundamentals:</p>
+                <h4 style="margin-top:15px;">Key Concepts</h4>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Points, Lines, Planes:</strong> Basic building blocks of geometry</li>
+                    <li><strong>Angles:</strong> Formed by two rays with a common endpoint</li>
+                    <li><strong>Polygons:</strong> Closed shapes with straight sides</li>
+                    <li><strong>Circles:</strong> All points equidistant from a center point</li>
+                </ul>
+                <h4 style="margin-top:15px;">Important Formulas</h4>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Area of rectangle:</strong> length × width</li>
+                    <li><strong>Area of triangle:</strong> ½ × base × height</li>
+                    <li><strong>Circumference of circle:</strong> 2πr</li>
+                    <li><strong>Area of circle:</strong> πr²</li>
+                </ul>
+                <h4 style="margin-top:15px;">3D Geometry</h4>
+                <p>In our 3D visualizations, you can explore:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Volume and surface area calculations</li>
+                    <li>Cross-sections of 3D shapes</li>
+                    <li>Perspective and orthographic views</li>
+                </ul>
+            `,
+            "calculus": `
+                <p>Calculus is the mathematical study of continuous change. It has two main branches:</p>
+                <h4 style="margin-top:15px;">Differential Calculus</h4>
+                <p>Concerned with the concept of a derivative, which represents the rate of change of a function.</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Derivative rules:</strong> Power rule, product rule, chain rule</li>
+                    <li><strong>Applications:</strong> Finding maxima/minima, optimization problems</li>
+                </ul>
+                <h4 style="margin-top:15px;">Integral Calculus</h4>
+                <p>Concerned with the concept of an integral, which represents the accumulation of quantities.</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Integration techniques:</strong> Substitution, integration by parts</li>
+                    <li><strong>Applications:</strong> Calculating areas, volumes, work</li>
+                </ul>
+                <h4 style="margin-top:15px;">Fundamental Theorem of Calculus</h4>
+                <p>Connects differentiation and integration, showing they are essentially inverse operations.</p>
+                <p>In our interactive modules, you'll explore these concepts through visualizations of:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Tangent lines and derivatives</li>
+                    <li>Area under curves and integrals</li>
+                    <li>3D surfaces and partial derivatives</li>
+                </ul>
+            `,
+            "data science": `
+                <p>Data science is an interdisciplinary field that uses scientific methods to extract knowledge from data. Here's an overview:</p>
+                <h4 style="margin-top:15px;">Key Components</h4>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Data Collection:</strong> Gathering raw data from various sources</li>
+                    <li><strong>Data Cleaning:</strong> Handling missing values, outliers, inconsistencies</li>
+                    <li><strong>Exploratory Analysis:</strong> Understanding patterns and relationships</li>
+                    <li><strong>Model Building:</strong> Creating predictive or descriptive models</li>
+                    <li><strong>Visualization:</strong> Communicating insights effectively</li>
+                </ul>
+                <h4 style="margin-top:15px;">Python for Data Science</h4>
+                <p>Essential libraries you'll learn:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>NumPy:</strong> Numerical computing</li>
+                    <li><strong>Pandas:</strong> Data manipulation and analysis</li>
+                    <li><strong>Matplotlib/Seaborn:</strong> Data visualization</li>
+                    <li><strong>Scikit-learn:</strong> Machine learning</li>
+                </ul>
+                <h4 style="margin-top:15px;">Machine Learning Basics</h4>
+                <p>Our course covers:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Supervised vs. unsupervised learning</li>
+                    <li>Regression and classification algorithms</li>
+                    <li>Model evaluation metrics</li>
+                    <li>Feature engineering</li>
+                </ul>
+            `,
+            "quantum computing": `
+                <p>Quantum computing leverages quantum mechanical phenomena to perform computations. Here's what makes it different:</p>
+                <h4 style="margin-top:15px;">Key Concepts</h4>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li><strong>Qubits:</strong> Quantum bits that can be in superposition of 0 and 1</li>
+                    <li><strong>Superposition:</strong> Ability to be in multiple states simultaneously</li>
+                    <li><strong>Entanglement:</strong> Strong correlation between qubits</li>
+                    <li><strong>Quantum Gates:</strong> Operations that manipulate qubit states</li>
+                </ul>
+                <h4 style="margin-top:15px;">Quantum vs Classical</h4>
+                <p>Quantum computers can solve certain problems much faster:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Factorization (Shor's algorithm)</li>
+                    <li>Database search (Grover's algorithm)</li>
+                    <li>Quantum simulation</li>
+                </ul>
+                <h4 style="margin-top:15px;">Challenges</h4>
+                <p>Current limitations include:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Qubit decoherence</li>
+                    <li>Error rates</li>
+                    <li>Scalability</li>
+                </ul>
+                <p>Our upcoming course will let you experiment with quantum circuits through interactive simulations.</p>
+            `,
+            "default": `
+                <p>I'd be happy to help with that! Could you please provide more details about what specifically you'd like to know? Here are some topics I can help explain:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Mathematical concepts (algebra, calculus, geometry)</li>
+                    <li>Data science and machine learning</li>
+                    <li>Quantum computing fundamentals</li>
+                    <li>Study techniques and learning strategies</li>
+                    <li>Course-specific questions</li>
+                </ul>
+                <p style="margin-top:15px;">You can also ask me to:</p>
+                <ul style="margin-top:10px; padding-left:20px;">
+                    <li>Explain a concept in simpler terms</li>
+                    <li>Provide examples or practice problems</li>
+                    <li>Suggest related learning resources</li>
+                    <li>Help troubleshoot difficulties you're having</li>
+                </ul>
+            `
+        };
+
+        // Initialize main 3D scene
+        function init3D() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('threeDContainer').appendChild(renderer.domElement);
+            
+            // Add controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Create course platform
+            const platformGeometry = new THREE.CircleGeometry(8, 64);
+            const platformMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xe2e8f0,
+                metalness: 0.1,
+                roughness: 0.7
+            });
+            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+            platform.rotation.x = -Math.PI / 2;
+            platform.receiveShadow = true;
+            scene.add(platform);
+            
+            // Create course objects
+            createCourseObjects();
+            
+            // Create AI recommendation bubbles
+            createRecommendationBubbles();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Create 3D course representations
+        function createCourseObjects() {
+            courses3D.forEach(course => {
+                // Base geometry
+                const geometry = new THREE.CylinderGeometry(0.8, 0.8, 0.2, 6);
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: course.color,
+                    metalness: 0.3,
+                    roughness: 0.4
+                });
+                const base = new THREE.Mesh(geometry, material);
+                base.position.set(course.position.x, 0.1, course.position.z);
+                base.rotation.y = Math.PI / 4;
+                scene.add(base);
+                
+                // Icon
+                const iconCanvas = document.createElement('canvas');
+                iconCanvas.width = 128;
+                iconCanvas.height = 128;
+                const iconContext = iconCanvas.getContext('2d');
+                iconContext.fillStyle = `#${course.color.toString(16)}`;
+                iconContext.fillRect(0, 0, iconCanvas.width, iconCanvas.height);
+                iconContext.fillStyle = 'white';
+                iconContext.textAlign = 'center';
+                iconContext.textBaseline = 'middle';
+                iconContext.font = '900 70px "Font Awesome 5 Free"';
+                iconContext.fillText(String.fromCharCode(parseInt(course.icon, 16)), 64, 64);
+                
+                const iconTexture = new THREE.CanvasTexture(iconCanvas);
+                const iconMaterial = new THREE.MeshStandardMaterial({ 
+                    map: iconTexture,
+                    metalness: 0.4,
+                    roughness: 0.2
+                });
+                const icon = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), iconMaterial);
+                icon.position.set(course.position.x, 0.6, course.position.z);
+                icon.rotation.y = Math.PI / 4;
+                scene.add(icon);
+                
+                // Add floating particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particleCount = 50;
+                const posArray = new Float32Array(particleCount * 3);
+                
+                for(let i = 0; i < particleCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 2;
+                }
+                
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                
+                const particlesMaterial = new THREE.PointsMaterial({
+                    size: 0.1,
+                    color: course.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+                particlesMesh.position.set(course.position.x, 1.8, course.position.z);
+                particlesMesh.userData = { floatSpeed: Math.random() * 0.02 + 0.01 };
+                scene.add(particlesMesh);
+            });
+        }
+        
+        // Create AI recommendation bubbles
+        function createRecommendationBubbles() {
+            const bubbleGroup = new THREE.Group();
+            
+            recommendedCourses.forEach((course, i) => {
+                // Create bubble geometry
+                const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.9,
+                    metalness: 0.2,
+                    roughness: 0.1
+                });
+                
+                const bubble = new THREE.Mesh(geometry, material);
+                bubble.position.set(
+                    Math.cos(i * 1.5) * 3,
+                    2 + i * 0.5,
+                    Math.sin(i * 1.5) * 3
+                );
+                
+                // Add text to bubble
+                const textCanvas = document.createElement('canvas');
+                textCanvas.width = 256;
+                textCanvas.height = 128;
+                const textContext = textCanvas.getContext('2d');
+                textContext.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+                textContext.font = '16px Arial';
+                textContext.fillStyle = 'white';
+                textContext.textAlign = 'center';
+                textContext.fillText(course.name, textCanvas.width/2, 30);
+                textContext.font = '14px Arial';
+                textContext.fillText(`${course.match}% match`, textCanvas.width/2, 50);
+                
+                const textTexture = new THREE.CanvasTexture(textCanvas);
+                const textMaterial = new THREE.MeshBasicMaterial({
+                    map: textTexture,
+                    transparent: true
+                });
+                
+                const textPlane = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1.2, 0.6),
+                    textMaterial
+                );
+                textPlane.position.set(bubble.position.x, bubble.position.y + 0.8, bubble.position.z);
+                textPlane.lookAt(camera.position);
+                
+                bubbleGroup.add(bubble);
+                bubbleGroup.add(textPlane);
+            });
+            
+            scene.add(bubbleGroup);
+        }
+        
+        // Initialize certificate 3D viewer
+        function initCertificateViewer() {
+            const container = document.getElementById('certificate3DView');
+            
+            certificateScene = new THREE.Scene();
+            certificateCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            certificateCamera.position.z = 5;
+            
+            certificateRenderer = new THREE.WebGLRenderer({ antialias: true });
+            certificateRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(certificateRenderer.domElement);
+            
+            // Certificate geometry
+            const geometry = new THREE.PlaneGeometry(3, 2);
+            const texture = new THREE.TextureLoader().load('https://images.unsplash.com/photo-1557200134-90327ee9fafa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');
+            const material = new THREE.MeshBasicMaterial({ 
+                map: texture,
+                side: THREE.DoubleSide
+            });
+            const certificate = new THREE.Mesh(geometry, material);
+            certificateScene.add(certificate);
+            
+            // Add lighting
+            const light = new THREE.AmbientLight(0xffffff, 0.8);
+            certificateScene.add(light);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1);
+            certificateScene.add(directionalLight);
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                certificate.rotation.y += 0.005;
+                certificateRenderer.render(certificateScene, certificateCamera);
+            }
+            animate();
+        }
+        
+        // Initialize syllabus 3D viewer
+        function initSyllabusViewer(moduleId) {
+            const container = document.getElementById('syllabus3DView');
+            
+            // Clear previous renderer if exists
+            if (syllabusRenderer) {
+                container.removeChild(syllabusRenderer.domElement);
+            }
+            
+            syllabusScene = new THREE.Scene();
+            syllabusCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            syllabusCamera.position.z = 5;
+            
+            syllabusRenderer = new THREE.WebGLRenderer({ antialias: true });
+            syllabusRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(syllabusRenderer.domElement);
+            
+            // Different 3D models for each module
+            let geometry;
+            switch(moduleId) {
+                case '1':
+                    geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+                    break;
+                case '2':
+                    geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+                    break;
+                case '3':
+                    geometry = new THREE.SphereGeometry(1, 32, 32);
+                    break;
+                case '4':
+                    geometry = new THREE.ConeGeometry(1, 2, 32);
+                    break;
+                default:
+                    geometry = new THREE.DodecahedronGeometry(1, 0);
+            }
+            
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x2563eb,
+                metalness: 0.2,
+                roughness: 0.4
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            syllabusScene.add(mesh);
+            
+            // Add lighting
+            const light = new THREE.AmbientLight(0xffffff, 0.5);
+            syllabusScene.add(light);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1);
+            syllabusScene.add(directionalLight);
+            
+            // Controls
+            const syllabusControls = new THREE.OrbitControls(syllabusCamera, syllabusRenderer.domElement);
+            syllabusControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                syllabusControls.update();
+                syllabusRenderer.render(syllabusScene, syllabusCamera);
+            }
+            animate();
+        }
+        
+        // Initialize virtual study room
+        function initStudyRoom() {
+            const container = document.getElementById('studyRoomView');
+            
+            studyRoomScene = new THREE.Scene();
+            studyRoomCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            studyRoomCamera.position.set(0, 2, 5);
+            
+            studyRoomRenderer = new THREE.WebGLRenderer({ antialias: true });
+            studyRoomRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(studyRoomRenderer.domElement);
+            
+            // Create room environment
+            const roomGeometry = new THREE.BoxGeometry(10, 5, 10);
+            const roomMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xf1f5f9,
+                side: THREE.BackSide
+            });
+            const room = new THREE.Mesh(roomGeometry, roomMaterial);
+            studyRoomScene.add(room);
+            
+            // Add table
+            const tableGeometry = new THREE.BoxGeometry(6, 0.5, 3);
+            const tableMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8b5cf6,
+                metalness: 0.1,
+                roughness: 0.7
+            });
+            const table = new THREE.Mesh(tableGeometry, tableMaterial);
+            table.position.y = -1.5;
+            studyRoomScene.add(table);
+            
+            // Add chairs (simplified avatars)
+            const chairGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 8);
+            const chairMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xec4899,
+                metalness: 0.2,
+                roughness: 0.4
+            });
+            
+            // User's chair
+            const userChair = new THREE.Mesh(chairGeometry, chairMaterial);
+            userChair.position.set(0, -2, 1.5);
+            userChair.rotation.x = Math.PI / 2;
+            studyRoomScene.add(userChair);
+            
+            // Other participants' chairs
+            const chairPositions = [
+                { x: 1.5, z: 0 },
+                { x: -1.5, z: 0 },
+                { x: 0, z: -1.5 }
+            ];
+            
+            chairPositions.forEach(pos => {
+                const chair = new THREE.Mesh(chairGeometry, chairMaterial);
+                chair.position.set(pos.x, -2, pos.z);
+                chair.rotation.x = Math.PI / 2;
+                studyRoomScene.add(chair);
+            });
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            studyRoomScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            studyRoomScene.add(directionalLight);
+            
+            // Controls
+            const studyRoomControls = new THREE.OrbitControls(studyRoomCamera, studyRoomRenderer.domElement);
+            studyRoomControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                studyRoomControls.update();
+                studyRoomRenderer.render(studyRoomScene, studyRoomCamera);
+            }
+            animate();
+        }
+        
+        // Initialize brain visualization
+        function initBrainVisualization() {
+            const container = document.getElementById('brainVisualization');
+            
+            brainScene = new THREE.Scene();
+            brainCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            brainCamera.position.z = 5;
+            
+            brainRenderer = new THREE.WebGLRenderer({ antialias: true });
+            brainRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(brainRenderer.domElement);
+            
+            // Simplified brain model (using spheres for demonstration)
+            const brainMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xff9e80,
+                metalness: 0.1,
+                roughness: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // Left hemisphere
+            const leftHemisphere = new THREE.Mesh(
+                new THREE.SphereGeometry(1.5, 32, 32),
+                brainMaterial
+            );
+            leftHemisphere.position.x = -0.8;
+            brainScene.add(leftHemisphere);
+            
+            // Right hemisphere
+            const rightHemisphere = new THREE.Mesh(
+                new THREE.SphereGeometry(1.5, 32, 32),
+                brainMaterial
+            );
+            rightHemisphere.position.x = 0.8;
+            brainScene.add(rightHemisphere);
+            
+            // Neural pathways (simplified)
+            const neuralPathways = [];
+            const pathwayGeometry = new THREE.TubeGeometry(
+                new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(-1, 0.5, 0),
+                    new THREE.Vector3(0, 1, 0),
+                    new THREE.Vector3(1, 0.5, 0)
+                ]),
+                20,
+                0.05,
+                8,
+                false
+            );
+            
+            const pathwayMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00bcd4,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            for (let i = 0; i < 10; i++) {
+                const pathway = new THREE.Mesh(pathwayGeometry, pathwayMaterial);
+                pathway.position.y = Math.random() - 0.5;
+                pathway.position.z = (Math.random() - 0.5) * 0.5;
+                pathway.rotation.y = (Math.random() - 0.5) * 0.2;
+                brainScene.add(pathway);
+                neuralPathways.push(pathway);
+            }
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            brainScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1);
+            brainScene.add(directionalLight);
+            
+            // Controls
+            const brainControls = new THREE.OrbitControls(brainCamera, brainRenderer.domElement);
+            brainControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Animate neural pathways
+                neuralPathways.forEach(pathway => {
+                    pathway.rotation.y += 0.001;
+                    pathway.position.y += Math.sin(Date.now() * 0.001) * 0.001;
+                });
+                
+                brainControls.update();
+                brainRenderer.render(brainScene, brainCamera);
+            }
+            animate();
+        }
+        
+        // Initialize knowledge timeline
+        function initKnowledgeTimeline() {
+            const container = document.getElementById('knowledgeTimeline');
+            
+            timelineScene = new THREE.Scene();
+            timelineCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            timelineCamera.position.set(0, 3, 10);
+            
+            timelineRenderer = new THREE.WebGLRenderer({ antialias: true });
+            timelineRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(timelineRenderer.domElement);
+            
+            // Create timeline path
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-8, 0, 0),
+                new THREE.Vector3(-4, 0.5, 0),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(4, -0.5, 0),
+                new THREE.Vector3(8, 0, 0)
+            ]);
+            
+            const points = curve.getPoints(50);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: 0x2563eb });
+            const curveObject = new THREE.Line(geometry, material);
+            timelineScene.add(curveObject);
+            
+            // Add timeline markers
+            const markers = [
+                { position: 0, text: "Algebra Basics", color: 0x10b981 },
+                { position: 0.25, text: "Geometry", color: 0xec4899 },
+                { position: 0.5, text: "Calculus", color: 0xf59e0b },
+                { position: 0.75, text: "Advanced", color: 0x8b5cf6 },
+                { position: 1, text: "Current", color: 0x2563eb }
+            ];
+            
+            markers.forEach(marker => {
+                const point = curve.getPointAt(marker.position);
+                
+                // Marker sphere
+                const sphereGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+                const sphereMaterial = new THREE.MeshBasicMaterial({ color: marker.color });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.copy(point);
+                timelineScene.add(sphere);
+                
+                // Marker text
+                const textCanvas = document.createElement('canvas');
+                textCanvas.width = 256;
+                textCanvas.height = 128;
+                const textContext = textCanvas.getContext('2d');
+                textContext.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+                textContext.font = '16px Arial';
+                textContext.fillStyle = 'white';
+                textContext.textAlign = 'center';
+                textContext.fillText(marker.text, textCanvas.width/2, 30);
+                
+                const textTexture = new THREE.CanvasTexture(textCanvas);
+                const textMaterial = new THREE.MeshBasicMaterial({
+                    map: textTexture,
+                    transparent: true
+                });
+                
+                const textPlane = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1.5, 0.75),
+                    textMaterial
+                );
+                textPlane.position.set(point.x, point.y + 0.5, point.z);
+                textPlane.lookAt(timelineCamera.position);
+                timelineScene.add(textPlane);
+            });
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            timelineScene.add(ambientLight);
+            
+            // Controls
+            const timelineControls = new THREE.OrbitControls(timelineCamera, timelineRenderer.domElement);
+            timelineControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                timelineControls.update();
+                timelineRenderer.render(timelineScene, timelineCamera);
+            }
+            animate();
+        }
+        
+        // Initialize VR exam simulation
+        function initExamSimulation() {
+            const container = document.getElementById('examSimulation');
+            
+            examScene = new THREE.Scene();
+            examCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            examCamera.position.set(0, 1.6, 0);
+            
+            examRenderer = new THREE.WebGLRenderer({ antialias: true });
+            examRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(examRenderer.domElement);
+            
+            // Create exam room
+            const roomGeometry = new THREE.BoxGeometry(10, 5, 10);
+            const roomMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xdddddd,
+                side: THREE.BackSide
+            });
+            const room = new THREE.Mesh(roomGeometry, roomMaterial);
+            examScene.add(room);
+            
+            // Add desk
+            const deskGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+            const deskMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8b5cf6,
+                metalness: 0.1,
+                roughness: 0.7
+            });
+            const desk = new THREE.Mesh(deskGeometry, deskMaterial);
+            desk.position.set(0, -1, -2);
+            examScene.add(desk);
+            
+            // Add chair
+            const chairGeometry = new THREE.BoxGeometry(0.5, 1, 0.5);
+            const chairMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x64748b,
+                metalness: 0.2,
+                roughness: 0.4
+            });
+            const chair = new THREE.Mesh(chairGeometry, chairMaterial);
+            chair.position.set(0, -1.75, -1);
+            examScene.add(chair);
+            
+            // Add exam paper
+            const paperGeometry = new THREE.PlaneGeometry(1.5, 1);
+            const paperMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff,
+                side: THREE.DoubleSide
+            });
+            const paper = new THREE.Mesh(paperGeometry, paperMaterial);
+            paper.position.set(0, -0.5, -1.75);
+            paper.rotation.x = -Math.PI / 8;
+            examScene.add(paper);
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            examScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            examScene.add(directionalLight);
+            
+            // Controls (simplified for demo)
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            
+            container.addEventListener('mousedown', () => {
+                isDragging = true;
+            });
+            
+            container.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaMove = {
+                    x: e.offsetX - previousMousePosition.x,
+                    y: e.offsetY - previousMousePosition.y
+                };
+                
+                examCamera.rotation.y -= deltaMove.x * 0.002;
+                examCamera.rotation.x -= deltaMove.y * 0.002;
+                
+                previousMousePosition = {
+                    x: e.offsetX,
+                    y: e.offsetY
+                };
+            });
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                examRenderer.render(examScene, examCamera);
+            }
+            animate();
+        }
+        
+        // Initialize skill radar chart
+        function initSkillRadar() {
+            const ctx = document.getElementById('skillRadar').getContext('2d');
+            
+            const skillData = {
+                labels: ['Math', 'Logic', 'Creativity', 'Memory', 'Speed', 'Focus'],
+                datasets: [{
+                    label: 'Your Skills',
+                    data: [85, 78, 65, 72, 68, 80],
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(37, 99, 235, 1)'
+                }]
+            };
+            
+            const config = {
+                type: 'radar',
+                data: skillData,
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                }
+            };
+            
+            new Chart(ctx, config);
+        }
+        
+        // Initialize mindmap visualization
+        function initMindmap() {
+            const container = document.getElementById('mindmapContainer');
+            
+            const mindmapScene = new THREE.Scene();
+            const mindmapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            mindmapCamera.position.z = 10;
+            
+            const mindmapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            mindmapRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(mindmapRenderer.domElement);
+            
+            // Central node
+            const centralGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const centralMaterial = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+            const centralNode = new THREE.Mesh(centralGeometry, centralMaterial);
+            mindmapScene.add(centralNode);
+            
+            // Child nodes
+            const nodes = [
+                { position: { x: -2, y: 1, z: 0 }, text: "Algebra", color: 0x10b981 },
+                { position: { x: 2, y: 1, z: 0 }, text: "Geometry", color: 0xec4899 },
+                { position: { x: 0, y: -2, z: 0 }, text: "Calculus", color: 0xf59e0b },
+                { position: { x: -3, y: -1, z: 0 }, text: "Functions", color: 0x8b5cf6 },
+                { position: { x: 3, y: -1, z: 0 }, text: "Theorems", color: 0xff9e80 }
+            ];
+            
+            nodes.forEach(node => {
+                // Node sphere
+                const geometry = new THREE.SphereGeometry(0.3, 32, 32);
+                const material = new THREE.MeshBasicMaterial({ color: node.color });
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.set(node.position.x, node.position.y, node.position.z);
+                mindmapScene.add(sphere);
+                
+                // Connection line
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(node.position.x, node.position.y, node.position.z)
+                ]);
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x94a3b8 });
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                mindmapScene.add(line);
+                
+                // Node text
+                const textCanvas = document.createElement('canvas');
+                textCanvas.width = 256;
+                textCanvas.height = 128;
+                const textContext = textCanvas.getContext('2d');
+                textContext.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                textContext.fillRect(0, 0, textCanvas.width, textCanvas.height);
+                textContext.font = '16px Arial';
+                textContext.fillStyle = 'white';
+                textContext.textAlign = 'center';
+                textContext.fillText(node.text, textCanvas.width/2, 30);
+                
+                const textTexture = new THREE.CanvasTexture(textCanvas);
+                const textMaterial = new THREE.MeshBasicMaterial({
+                    map: textTexture,
+                    transparent: true
+                });
+                
+                const textPlane = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1.2, 0.6),
+                    textMaterial
+                );
+                textPlane.position.set(
+                    node.position.x * 1.2,
+                    node.position.y * 1.2,
+                    node.position.z * 1.2
+                );
+                textPlane.lookAt(mindmapCamera.position);
+                mindmapScene.add(textPlane);
+            });
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            mindmapScene.add(ambientLight);
+            
+            // Controls
+            const mindmapControls = new THREE.OrbitControls(mindmapCamera, mindmapRenderer.domElement);
+            mindmapControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                mindmapControls.update();
+                mindmapRenderer.render(mindmapScene, mindmapCamera);
+            }
+            animate();
+        }
+        
+        // Initialize heatmap visualization
+        function initHeatmap() {
+            const container = document.getElementById('heatmapContainer');
+            
+            const heatmapScene = new THREE.Scene();
+            const heatmapCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            heatmapCamera.position.z = 5;
+            
+            const heatmapRenderer = new THREE.WebGLRenderer({ antialias: true });
+            heatmapRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(heatmapRenderer.domElement);
+            
+            // Create heatmap plane
+            const planeGeometry = new THREE.PlaneGeometry(8, 5);
+            const planeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xf1f5f9,
+                side: THREE.DoubleSide
+            });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            heatmapScene.add(plane);
+            
+            // Add heatmap points
+            const heatmapPoints = [];
+            const colors = [0xff0000, 0xff9900, 0xffff00, 0x00ff00, 0x0099ff];
+            
+            for (let i = 0; i < 50; i++) {
+                const size = Math.random() * 0.5 + 0.2;
+                const intensity = Math.floor(Math.random() * 5);
+                
+                const geometry = new THREE.CircleGeometry(size, 32);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: colors[intensity],
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const point = new THREE.Mesh(geometry, material);
+                
+                point.position.set(
+                    (Math.random() - 0.5) * 7,
+                    (Math.random() - 0.5) * 4,
+                    0.1
+                );
+                
+                point.rotation.z = Math.random() * Math.PI;
+                heatmapScene.add(point);
+                heatmapPoints.push(point);
+            }
+            
+            // Add legend
+            const legendCanvas = document.createElement('canvas');
+            legendCanvas.width = 200;
+            legendCanvas.height = 100;
+            const legendContext = legendCanvas.getContext('2d');
+            
+            // Gradient background
+            const gradient = legendContext.createLinearGradient(0, 0, legendCanvas.width, 0);
+            gradient.addColorStop(0, '#ff0000');
+            gradient.addColorStop(0.25, '#ff9900');
+            gradient.addColorStop(0.5, '#ffff00');
+            gradient.addColorStop(0.75, '#00ff00');
+            gradient.addColorStop(1, '#0099ff');
+            
+            legendContext.fillStyle = gradient;
+            legendContext.fillRect(0, 30, legendCanvas.width, 20);
+            
+            // Text
+            legendContext.fillStyle = 'black';
+            legendContext.font = '14px Arial';
+            legendContext.textAlign = 'center';
+            legendContext.fillText('Course Engagement Heatmap', legendCanvas.width/2, 20);
+            legendContext.font = '12px Arial';
+            legendContext.fillText('Low', 10, 70);
+            legendContext.fillText('High', legendCanvas.width - 10, 70);
+            
+            const legendTexture = new THREE.CanvasTexture(legendCanvas);
+            const legendMaterial = new THREE.MeshBasicMaterial({
+                map: legendTexture,
+                transparent: true
+            });
+            
+            const legendPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 1.5),
+                legendMaterial
+            );
+            legendPlane.position.set(0, -3, 0.1);
+            heatmapScene.add(legendPlane);
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            heatmapScene.add(ambientLight);
+            
+            // Controls
+            const heatmapControls = new THREE.OrbitControls(heatmapCamera, heatmapRenderer.domElement);
+            heatmapControls.enableDamping = true;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                heatmapControls.update();
+                heatmapRenderer.render(heatmapScene, heatmapCamera);
+            }
+            animate();
+        }
+        
+        // Window resize handler
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            if (certificateRenderer) {
+                const container = document.getElementById('certificate3DView');
+                certificateCamera.aspect = container.clientWidth / container.clientHeight;
+                certificateCamera.updateProjectionMatrix();
+                certificateRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            
+            if (syllabusRenderer) {
+                const container = document.getElementById('syllabus3DView');
+                syllabusCamera.aspect = container.clientWidth / container.clientHeight;
+                syllabusCamera.updateProjectionMatrix();
+                syllabusRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            
+            if (studyRoomRenderer) {
+                const container = document.getElementById('studyRoomView');
+                studyRoomCamera.aspect = container.clientWidth / container.clientHeight;
+                studyRoomCamera.updateProjectionMatrix();
+                studyRoomRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            
+            if (brainRenderer) {
+                const container = document.getElementById('brainVisualization');
+                brainCamera.aspect = container.clientWidth / container.clientHeight;
+                brainCamera.updateProjectionMatrix();
+                brainRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            
+            if (timelineRenderer) {
+                const container = document.getElementById('knowledgeTimeline');
+                timelineCamera.aspect = container.clientWidth / container.clientHeight;
+                timelineCamera.updateProjectionMatrix();
+                timelineRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+            
+            if (examRenderer) {
+                const container = document.getElementById('examSimulation');
+                examCamera.aspect = container.clientWidth / container.clientHeight;
+                examCamera.updateProjectionMatrix();
+                examRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            init3D();
+            
+            // Render AI recommended courses in sidebar
+            const recommendationsContainer = document.getElementById('aiRecommendations');
+            recommendedCourses.forEach(course => {
+                const courseCard = document.createElement('div');
+                courseCard.className = 'course-card';
+                courseCard.innerHTML = `
+                    <div class="course-image" style="background-image: url('${course.image}')">
+                        <span class="course-badge" style="background: var(--primary);">${course.match}% Match</span>
+                    </div>
+                    <div class="course-content">
+                        <h3 class="course-title">${course.name}</h3>
+                        <p class="course-description">${course.description}</p>
+                        <div class="course-meta">
+                            <span class="course-duration">
+                                <i class="far fa-clock"></i> ${course.duration}
+                            </span>
+                            <div class="course-actions">
+                                ${course.price > 0 ? 
+                                    `<button class="btn btn-premium">$${course.price.toFixed(2)}</button>` : 
+                                    `<button class="btn btn-enroll">Enroll Now</button>`}
+                                <button class="btn btn-details">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                recommendationsContainer.appendChild(courseCard);
+            });
+            
+            // Add event listeners to all "View Details" buttons
+            document.querySelectorAll('.btn-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const courseCard = this.closest('.course-card');
+                    const courseTitle = courseCard.querySelector('.course-title').textContent;
+                    showCourseDetails(courseTitle);
+                });
+            });
+            
+            // Add event listeners to all "Enroll Now" buttons
+            document.querySelectorAll('.btn-enroll').forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('You have been enrolled in this free course! Access your learning materials now.');
+                });
+            });
+            
+            // Add event listeners to all premium buttons
+            document.querySelectorAll('.btn-premium').forEach(button => {
+                button.addEventListener('click', function() {
+                    const courseCard = this.closest('.course-card');
+                    const courseTitle = courseCard.querySelector('.course-title').textContent;
+                    showPaymentModal(courseTitle);
+                });
+            });
+            
+            // Update countdown timer
+            function updateCountdown() {
+                const launchDate = new Date('2023-12-01T00:00:00');
+                const now = new Date();
+                const diff = launchDate - now;
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.querySelector('.countdown-timer').textContent = 
+                    `${days}d ${hours}h ${mins}m`;
+            }
+            
+            setInterval(updateCountdown, 60000);
+            updateCountdown();
+            
+            // 3D navigation controls
+            document.getElementById('mathControl').addEventListener('click', () => {
+                gsap.to(camera.position, { x: -5, y: 3, z: 5, duration: 1 });
+                gsap.to(controls.target, { x: -3, y: 0, z: 0, duration: 1 });
+            });
+            
+            document.getElementById('scienceControl').addEventListener('click', () => {
+                gsap.to(camera.position, { x: 0, y: 3, z: -5, duration: 1 });
+                gsap.to(controls.target, { x: 0, y: 0, z: -3, duration: 1 });
+            });
+            
+            document.getElementById('resetView').addEventListener('click', () => {
+                gsap.to(camera.position, { x: 0, y: 5, z: 10, duration: 1 });
+                gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+            });
+            
+            // Mobile sidebar toggle
+            if (window.innerWidth < 768) {
+                document.getElementById('coursesSidebar').classList.remove('active');
+                document.getElementById('closeSidebar').style.display = 'block';
+                
+                document.getElementById('threeDContainer').addEventListener('click', () => {
+                    document.getElementById('coursesSidebar').classList.add('active');
+                });
+                
+                document.getElementById('closeSidebar').addEventListener('click', () => {
+                    document.getElementById('coursesSidebar').classList.remove('active');
+                });
+            }
+            
+            // Instructor modal
+            const instructorModal = document.getElementById('instructorModal');
+            document.querySelectorAll('.instructor-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    instructorModal.classList.add('active');
+                });
+            });
+            
+            document.getElementById('closeInstructorModal').addEventListener('click', () => {
+                instructorModal.classList.remove('active');
+                instructorModal.querySelector('video').pause();
+            });
+            
+            // Certificate modal
+            const certificateModal = document.getElementById('certificateModal');
+            document.querySelectorAll('.certificate-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    certificateModal.classList.add('active');
+                    initCertificateViewer();
+                });
+            });
+            
+            document.getElementById('closeCertificateModal').addEventListener('click', () => {
+                certificateModal.classList.remove('active');
+            });
+            
+            // Syllabus modal
+            const syllabusModal = document.getElementById('syllabusModal');
+            document.querySelectorAll('.syllabus-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    syllabusModal.classList.add('active');
+                    initSyllabusViewer('1'); // Default to first module
+                });
+            });
+            
+            document.getElementById('closeSyllabusModal').addEventListener('click', () => {
+                syllabusModal.classList.remove('active');
+            });
+            
+            // Syllabus item clicks
+            document.querySelectorAll('.syllabus-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const moduleId = this.getAttribute('data-module');
+                    initSyllabusViewer(moduleId);
+                });
+            });
+            
+            // Study Room modal
+            const studyRoomModal = document.getElementById('studyRoomModal');
+            document.getElementById('studyRoomBtn').addEventListener('click', () => {
+                studyRoomModal.classList.add('active');
+                initStudyRoom();
+            });
+            
+            document.getElementById('closeStudyRoomModal').addEventListener('click', () => {
+                studyRoomModal.classList.remove('active');
+            });
+            
+            // Timeline modal
+            const timelineModal = document.getElementById('timelineModal');
+            document.getElementById('techControl').addEventListener('click', () => {
+                timelineModal.classList.add('active');
+                initKnowledgeTimeline();
+            });
+            
+            document.getElementById('closeTimelineModal').addEventListener('click', () => {
+                timelineModal.classList.remove('active');
+            });
+            
+            // Exam modal
+            const examModal = document.getElementById('examModal');
+            document.getElementById('resetView').addEventListener('dblclick', () => {
+                examModal.classList.add('active');
+                initExamSimulation();
+            });
+            
+            document.getElementById('closeExamModal').addEventListener('click', () => {
+                examModal.classList.remove('active');
+            });
+            
+            // AR Buttons
+            document.getElementById('mathARButton').addEventListener('click', () => {
+                alert('Launching AR view for Math course. This would use WebXR API in a real implementation.');
+            });
+            
+            document.getElementById('scienceARButton').addEventListener('click', () => {
+                alert('Launching AR view for Science course. This would use WebXR API in a real implementation.');
+            });
+            
+            // AI Tutor Chat
+            const aiTutorWidget = document.getElementById('aiTutorWidget');
+            const aiTutorToggle = document.getElementById('aiTutorToggle');
+            const aiTutorBody = document.getElementById('aiTutorBody');
+            const aiTutorInput = document.getElementById('aiTutorInput');
+            const aiTutorSend = document.getElementById('aiTutorSend');
+            
+            aiTutorHeader.addEventListener('click', () => {
+                aiTutorWidget.classList.toggle('active');
+                aiTutorToggle.classList.toggle('fa-chevron-up');
+                aiTutorToggle.classList.toggle('fa-chevron-down');
+            });
+            
+            function addBotMessage(html) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'ai-message bot';
+                messageDiv.innerHTML = html;
+                aiTutorBody.appendChild(messageDiv);
+                aiTutorBody.scrollTop = aiTutorBody.scrollHeight;
+            }
+            
+            function addUserMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'ai-message user';
+                messageDiv.textContent = text;
+                aiTutorBody.appendChild(messageDiv);
+                aiTutorBody.scrollTop = aiTutorBody.scrollHeight;
+            }
+            
+            function getAIResponse(question) {
+                // Convert question to lowercase for easier matching
+                const lowerQuestion = question.toLowerCase();
+                
+                // Check for specific topics in the question
+                if (lowerQuestion.includes('algebra')) {
+                    return aiTutorKnowledge['algebra'];
+                } else if (lowerQuestion.includes('geometry')) {
+                    return aiTutorKnowledge['geometry'];
+                } else if (lowerQuestion.includes('calculus')) {
+                    return aiTutorKnowledge['calculus'];
+                } else if (lowerQuestion.includes('data science') || lowerQuestion.includes('machine learning')) {
+                    return aiTutorKnowledge['data science'];
+                } else if (lowerQuestion.includes('quantum')) {
+                    return aiTutorKnowledge['quantum computing'];
+                } else if (lowerQuestion.includes('help') || lowerQuestion.includes('support')) {
+                    return `
+                        <p>I can help you with:</p>
+                        <ul style="margin-top:10px; padding-left:20px;">
+                            <li>Understanding course concepts</li>
+                            <li>Solving practice problems</li>
+                            <li>Explaining mathematical theories</li>
+                            <li>Providing study tips</li>
+                            <li>Recommending learning resources</li>
+                        </ul>
+                        <p style="margin-top:15px;">Try asking me something like:</p>
+                        <ul style="margin-top:10px; padding-left:20px;">
+                            <li>"Can you explain derivatives in calculus?"</li>
+                            <li>"How do I solve quadratic equations?"</li>
+                            <li>"What's the best way to study for exams?"</li>
+                        </ul>
+                    `;
+                } else {
+                    return aiTutorKnowledge['default'];
+                }
+            }
+            
+            aiTutorSend.addEventListener('click', () => {
+                const question = aiTutorInput.value.trim();
+                if (question) {
+                    addUserMessage(question);
+                    aiTutorInput.value = '';
+                    
+                    // Show typing indicator
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.className = 'ai-message bot';
+                    typingIndicator.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+                    aiTutorBody.appendChild(typingIndicator);
+                    aiTutorBody.scrollTop = aiTutorBody.scrollHeight;
+                    
+                    // Simulate AI response after a short delay
+                    setTimeout(() => {
+                        // Remove typing indicator
+                        aiTutorBody.removeChild(typingIndicator);
+                        
+                        // Add actual response
+                        const response = getAIResponse(question);
+                        addBotMessage(response);
+                    }, 1500);
+                }
+            });
+            
+            aiTutorInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    aiTutorSend.click();
+                }
+            });
+            
+            // Voice Control
+            const voiceControlBtn = document.getElementById('voiceControlBtn');
+            const voiceIndicator = document.getElementById('voiceIndicator');
+            
+            if (annyang) {
+                // Add voice commands
+                const commands = {
+                    'show math courses': () => {
+                        gsap.to(camera.position, { x: -5, y: 3, z: 5, duration: 1 });
+                        gsap.to(controls.target, { x: -3, y: 0, z: 0, duration: 1 });
+                        showVoiceFeedback();
+                    },
+                    'show science courses': () => {
+                        gsap.to(camera.position, { x: 0, y: 3, z: -5, duration: 1 });
+                        gsap.to(controls.target, { x: 0, y: 0, z: -3, duration: 1 });
+                        showVoiceFeedback();
+                    },
+                    'reset view': () => {
+                        gsap.to(camera.position, { x: 0, y: 5, z: 10, duration: 1 });
+                        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+                        showVoiceFeedback();
+                    },
+                    'open syllabus': () => {
+                        syllabusModal.classList.add('active');
+                        initSyllabusViewer('1');
+                        showVoiceFeedback();
+                    },
+                    'ask tutor *question': (question) => {
+                        aiTutorWidget.classList.add('active');
+                        aiTutorInput.value = question;
+                        aiTutorSend.click();
+                        showVoiceFeedback();
+                    },
+                    'show study room': () => {
+                        studyRoomModal.classList.add('active');
+                        initStudyRoom();
+                        showVoiceFeedback();
+                    },
+                    'show course details': () => {
+                        showCourseDetails('Mathematics Fundamentals');
+                        showVoiceFeedback();
+                    }
+                };
+                
+                annyang.addCommands(commands);
+                
+                voiceControlBtn.addEventListener('click', () => {
+                    if (annyang.isListening()) {
+                        annyang.abort();
+                        voiceControlBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                    } else {
+                        annyang.start();
+                        voiceControlBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    }
+                });
+            } else {
+                voiceControlBtn.style.display = 'none';
+            }
+            
+            function showVoiceFeedback() {
+                voiceIndicator.classList.add('active');
+                setTimeout(() => {
+                    voiceIndicator.classList.remove('active');
+                }, 1000);
+            }
+            
+            // Haptic Feedback
+            function triggerHapticFeedback() {
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            }
+            
+            // Initialize skill radar when shown
+            const skillRadarContainer = document.getElementById('skillRadar');
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    initSkillRadar();
+                    observer.unobserve(skillRadarContainer);
+                }
+            });
+            
+            observer.observe(skillRadarContainer);
+            
+            // Initialize brain visualization when shown
+            document.getElementById('mathControl').addEventListener('click', () => {
+                document.getElementById('brainVisualization').style.display = 'block';
+                document.getElementById('skillRadar').style.display = 'none';
+                document.getElementById('mindmapContainer').style.display = 'none';
+                document.getElementById('heatmapContainer').style.display = 'none';
+                initBrainVisualization();
+            });
+            
+            // Initialize mindmap when shown
+            document.getElementById('scienceControl').addEventListener('click', () => {
+                document.getElementById('brainVisualization').style.display = 'none';
+                document.getElementById('skillRadar').style.display = 'none';
+                document.getElementById('mindmapContainer').style.display = 'block';
+                document.getElementById('heatmapContainer').style.display = 'none';
+                initMindmap();
+            });
+            
+            // Initialize heatmap when shown
+            document.getElementById('techControl').addEventListener('click', () => {
+                document.getElementById('brainVisualization').style.display = 'none';
+                document.getElementById('skillRadar').style.display = 'none';
+                document.getElementById('mindmapContainer').style.display = 'none';
+                document.getElementById('heatmapContainer').style.display = 'block';
+                initHeatmap();
+            });
+            
+            // Show skill radar by default
+            document.getElementById('skillRadar').style.display = 'block';
+            initSkillRadar();
+            
+            // Payment Modal
+            const paymentModal = document.getElementById('paymentModal');
+            const upiPayment = document.getElementById('upiPayment');
+            const cardPayment = document.getElementById('cardPayment');
+            
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    document.querySelector('.payment-method.active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    const methodType = this.getAttribute('data-method');
+                    if (methodType === 'upi') {
+                        upiPayment.style.display = 'block';
+                        cardPayment.style.display = 'none';
+                    } else {
+                        upiPayment.style.display = 'none';
+                        cardPayment.style.display = 'block';
+                    }
+                });
+            });
+            
+            document.getElementById('copyUpiBtn').addEventListener('click', function() {
+                navigator.clipboard.writeText('8789297252@paytm').then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+            
+            document.getElementById('closePaymentModal').addEventListener('click', () => {
+                paymentModal.classList.remove('active');
+            });
+            
+            // Course Details Modal
+            const courseDetailsModal = document.getElementById('courseDetailsModal');
+            
+            document.getElementById('closeCourseDetailsModal').addEventListener('click', () => {
+                courseDetailsModal.classList.remove('active');
+            });
+            
+            // Tab switching in course details
+            document.querySelectorAll('.course-details-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelector('.course-details-tab.active').classList.remove('active');
+                    this.classList.add('active');
+                    
+                    const tabName = this.getAttribute('data-tab');
+                    loadCourseDetailsTab(tabName);
+                });
+            });
+            
+            // Function to show course details
+            function showCourseDetails(courseName) {
+                const course = courseDetails[courseName];
+                if (!course) return;
+                
+                // Set basic course info
+                document.getElementById('courseDetailsTitle').textContent = courseName;
+                document.getElementById('courseDetailsDescription').textContent = course.description;
+                document.getElementById('courseDetailsDuration').textContent = course.duration;
+                document.getElementById('courseDetailsLevel').textContent = course.level;
+                document.getElementById('courseDetailsRating').textContent = course.rating;
+                document.getElementById('courseDetailsImage').style.backgroundImage = `url('${course.image}')`;
+                
+                // Set enrollment buttons
+                if (course.type === 'free') {
+                    document.getElementById('enrollFromDetails').style.display = 'inline-block';
+                    document.getElementById('buyFromDetails').style.display = 'none';
+                } else if (course.type === 'premium') {
+                    document.getElementById('enrollFromDetails').style.display = 'none';
+                    document.getElementById('buyFromDetails').style.display = 'inline-block';
+                    document.getElementById('buyFromDetails').textContent = `$${course.price.toFixed(2)}`;
+                } else {
+                    document.getElementById('enrollFromDetails').style.display = 'none';
+                    document.getElementById('buyFromDetails').style.display = 'none';
+                }
+                
+                // Set button click handlers
+                document.getElementById('enrollFromDetails').onclick = function() {
+                    alert(`You have been enrolled in ${courseName}! Access your learning materials now.`);
+                    courseDetailsModal.classList.remove('active');
+                };
+                
+                document.getElementById('buyFromDetails').onclick = function() {
+                    showPaymentModal(courseName);
+                };
+                
+                // Load default tab (overview)
+                document.querySelector('.course-details-tab.active').classList.remove('active');
+                document.querySelector('.course-details-tab[data-tab="overview"]').classList.add('active');
+                loadCourseDetailsTab('overview');
+                
+                // Show modal
+                courseDetailsModal.classList.add('active');
+            }
+            
+            // Function to load course details tab content
+            function loadCourseDetailsTab(tabName) {
+                const courseName = document.getElementById('courseDetailsTitle').textContent;
+                const course = courseDetails[courseName];
+                const tabContent = document.getElementById('courseDetailsBody');
+                
+                switch(tabName) {
+                    case 'overview':
+                        tabContent.innerHTML = course.overview;
+                        break;
+                    case 'curriculum':
+                        let curriculumHTML = '<h4>Course Curriculum</h4><div style="margin-top:15px;">';
+                        course.curriculum.forEach((item, index) => {
+                            curriculumHTML += `
+                                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #e2e8f0;">
+                                    <div>
+                                        <span style="color:#64748b;">${index + 1}.</span>
+                                        <span style="margin-left:10px;">${item.title}</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:15px;">
+                                        <span style="color:#64748b; font-size:0.875rem;">${item.duration}</span>
+                                        ${item.completed ? 
+                                            '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : 
+                                            '<i class="far fa-circle" style="color:#cbd5e1;"></i>'}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        curriculumHTML += '</div>';
+                        tabContent.innerHTML = curriculumHTML;
+                        break;
+                    case 'instructor':
+                        tabContent.innerHTML = `
+                            <div style="display:flex; gap:20px;">
+                                <img src="${course.instructor.image}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+                                <div>
+                                    <h4>${course.instructor.name}</h4>
+                                    <p style="color:#64748b; margin-top:10px;">${course.instructor.bio}</p>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'reviews':
+                        if (course.reviews.length === 0) {
+                            tabContent.innerHTML = '<p style="color:#64748b; text-align:center;">No reviews yet for this course.</p>';
+                        } else {
+                            let reviewsHTML = '<div style="margin-top:10px;">';
+                            course.reviews.forEach(review => {
+                                reviewsHTML += `
+                                    <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #e2e8f0;">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                            <strong>${review.author}</strong>
+                                            <div>
+                                                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                                            </div>
+                                        </div>
+                                        <p style="color:#64748b;">${review.comment}</p>
+                                    </div>
+                                `;
+                            });
+                            reviewsHTML += '</div>';
+                            tabContent.innerHTML = reviewsHTML;
+                        }
+                        break;
+                }
+            }
+            
+            // Function to show payment modal
+            function showPaymentModal(courseName) {
+                const course = courseDetails[courseName];
+                if (!course) return;
+                
+                // Set course info in payment modal
+                document.querySelector('.payment-modal h3').innerHTML = `
+                    <i class="fas fa-credit-card" style="color:var(--primary);"></i>
+                    Complete Your Purchase: ${courseName}
+                `;
+                
+                document.querySelector('.payment-modal .course-title').textContent = courseName;
+                document.querySelector('.payment-modal .course-amount').textContent = `$${course.price.toFixed(2)}`;
+                
+                // Show modal
+                paymentModal.classList.add('active');
+                courseDetailsModal.classList.remove('active');
+                
+                // Set up payment completion
+                document.querySelector('.payment-modal button').onclick = function() {
+                    alert(`Payment of $${course.price.toFixed(2)} for ${courseName} completed successfully! You now have full access to the course.`);
+                    paymentModal.classList.remove('active');
+                };
+            }
+        });
+    </script>
+</body>
+</html>
