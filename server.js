@@ -88,6 +88,11 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// -------------------- HEALTH CHECK --------------------
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // -------------------- USER AUTH --------------------
 app.post("/api/auth/signup", async (req, res) => {
   try {
