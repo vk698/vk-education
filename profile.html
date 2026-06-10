@@ -2,948 +2,601 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My Profile - StudyHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #4a6fa5;
-            --secondary: #ff6b6b;
-            --dark: #2c3e50;
-            --light: #f0f4f8;
-            --text-light: #7f8c8d;
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
         }
-        
+
+        :root {
+            --accent: #f97316;
+            --accent-light: #ff9f4a;
+            --text-light: #f8fafc;
+            --text-dim: #cbd5e1;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background-color: var(--light);
+            background: #0a0f1c;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
-        
+
+        /* 3D background container */
+        #threejs-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Header */
         header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(16px);
+            background: rgba(10, 15, 28, 0.7);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.8rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background-color: var(--primary);
-            color: white;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-        
+
         .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
             display: flex;
             align-items: center;
+            gap: 0.6rem;
+            font-size: 1.8rem;
+            font-weight: 800;
         }
-        
-        .logo i {
-            margin-right: 0.5rem;
-        }
-        
+        .logo i { color: var(--accent); font-size: 2rem; }
+        .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+
         nav {
             display: flex;
-            gap: 1.5rem;
+            gap: 1.2rem;
         }
-        
         nav a {
-            color: white;
+            color: var(--text-dim);
             text-decoration: none;
             font-weight: 500;
+            transition: 0.2s;
+            position: relative;
         }
-        
+        nav a:hover { color: var(--accent); }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 0.4rem 1rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(249,115,22,0.2);
+            color: var(--accent);
+        }
+
+        /* Profile Container */
         .profile-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 2rem auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            padding: 2rem;
+            padding: 0 2rem;
         }
-        
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.6s ease-out;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .profile-header {
             display: flex;
             align-items: center;
-            margin-bottom: 2rem;
+            gap: 2rem;
+            flex-wrap: wrap;
         }
-        
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
+
+        .avatar {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
+            background: #2d2d44;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-right: 2rem;
             overflow: hidden;
-            position: relative;
-            border: 3px solid var(--light);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            border: 3px solid var(--accent);
         }
-        
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar span { font-size: 3rem; font-weight: bold; color: var(--accent); }
+
+        .profile-info h2 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+        .profile-info p { color: var(--text-dim); margin-bottom: 0.2rem; }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
         }
-        
-        .profile-info h2 {
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-        }
-        
-        .profile-info p {
-            color: var(--text-light);
-            margin-bottom: 0.3rem;
-        }
-        
-        .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .stat-card {
-            background-color: var(--light);
-            border-radius: 8px;
-            padding: 1.5rem;
+        .stat {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
             text-align: center;
-            transition: transform 0.3s;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card h3 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-card p {
-            color: var(--dark);
-        }
-        
-        .profile-details {
-            margin-top: 2rem;
-        }
-        
-        .detail-group {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .detail-group h3 {
-            color: var(--dark);
-            margin-bottom: 0.8rem;
-            font-size: 1.2rem;
-        }
-        
-        .detail-group p {
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-        
-        .btn {
-            padding: 0.8rem 1.5rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 500;
+        .stat .number { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .stat .label { font-size: 0.8rem; color: var(--text-dim); }
+
+        .edit-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: 0.2s;
         }
-        
-        .btn:hover {
-            background-color: #3a5a80;
-            transform: translateY(-2px);
+        .edit-btn:hover {
+            background: var(--accent);
+            color: white;
         }
-        
-        .btn-edit {
-            background-color: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            margin-left: 1rem;
+
+        .detail-group {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
         }
-        
-        .btn-edit:hover {
-            background-color: var(--light);
+        .detail-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
         }
-        
+        .detail-group h3 { font-size: 1.2rem; }
+        .detail-content p { color: var(--text-dim); }
+
         .edit-form {
             display: none;
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background-color: var(--light);
-            border-radius: 8px;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-            font-weight: 500;
-        }
-        
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .form-actions {
-            margin-top: 1.5rem;
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .avatar-upload {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .avatar-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        
-        .avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 1rem;
             margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
         }
-        
-        .social-links a {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 1.2rem;
+        .edit-form input, .edit-form textarea, .edit-form select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            color: white;
+            margin-bottom: 1rem;
         }
-        
+        .edit-form textarea { border-radius: 20px; resize: vertical; }
+        .edit-form button { margin-right: 0.5rem; }
+
         .badges {
             display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            gap: 0.8rem;
             flex-wrap: wrap;
+            margin-top: 1rem;
         }
-        
         .badge {
-            background-color: var(--secondary);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
+            background: rgba(249,115,22,0.2);
+            border: 1px solid var(--accent);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
             font-size: 0.8rem;
-            font-weight: 500;
         }
-        
+
         .progress-container {
             margin-top: 1rem;
         }
-        
         .progress-bar {
             height: 8px;
-            background-color: #e0e0e0;
+            background: rgba(255,255,255,0.1);
             border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
         }
-        
         .progress-fill {
             height: 100%;
-            background-color: var(--primary);
+            background: var(--accent);
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.5s;
         }
-        
-        .progress-text {
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
             font-size: 0.9rem;
-            color: var(--text-light);
-        }
-        
-        /* New styles for avatar upload */
-        .avatar-upload-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .avatar-upload-btn {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-        
-        .avatar-upload-btn input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
+            z-index: 2000;
             opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
         }
-        
-        .avatar-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-remove {
-            background-color: var(--secondary);
-        }
-        
-        .btn-remove:hover {
-            background-color: #e05555;
+        .toast.error { background: #e74c3c; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .profile-header { flex-direction: column; text-align: center; }
+            .stats { justify-content: center; }
         }
     </style>
 </head>
 <body>
+    <div id="threejs-bg"></div>
+    
     <header>
-        <div class="logo">
-            <i>📚</i> StudyHub
-        </div>
+        <div class="logo"><i class="fas fa-graduation-cap"></i> <span>StudyHub</span></div>
         <nav>
             <a href="index.html">Home</a>
             <a href="courses.html">Courses</a>
             <a href="notes.html">Notes</a>
             <a href="community.html">Community</a>
-            <a href="messages.html">Messages</a>
+            <a href="exams.html">Exams</a>
         </nav>
-        <div>
-            <a href="profile.html" class="btn">My Profile</a>
-        </div>
+        <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </header>
 
     <div class="profile-container">
-        <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar">
-                <img id="avatarImage" src="" alt="Profile Picture">
-                <span id="avatarInitial">J</span>
-            </div>
-            <div class="profile-info">
-                <h2 id="profileName">John Student</h2>
-                <p id="profileEmail">john@example.com</p>
-                <p id="profileGrade">Grade 12</p>
-                <p id="profileSchool">Springfield High School</p>
-                <div class="social-links" id="socialLinks">
-                    <!-- Social links will be added dynamically -->
+        <div class="glass-card">
+            <div class="profile-header">
+                <div class="avatar" id="avatarContainer">
+                    <img id="avatarImg" src="" alt="Profile">
+                    <span id="avatarInitial"></span>
                 </div>
+                <div class="profile-info">
+                    <h2 id="fullname">Loading...</h2>
+                    <p id="email"></p>
+                    <p id="grade"></p>
+                    <div class="stats">
+                        <div class="stat"><div class="number" id="coursesCount">0</div><div class="label">Courses</div></div>
+                        <div class="stat"><div class="number" id="postsCount">0</div><div class="label">Posts</div></div>
+                        <div class="stat"><div class="number" id="notesCount">0</div><div class="label">Notes</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-text">Profile completion: <span id="completionPercent">0</span>%</div>
+                <div class="progress-bar"><div class="progress-fill" id="completionFill"></div></div>
+            </div>
+            <div class="badges" id="badgesContainer"></div>
+        </div>
+
+        <!-- About -->
+        <div class="glass-card">
+            <div class="detail-group-header"><h3>About Me</h3><button class="edit-btn" onclick="toggleEdit('about')">Edit</button></div>
+            <div class="detail-content"><p id="aboutText"></p></div>
+            <div class="edit-form" id="aboutForm">
+                <textarea id="aboutInput" rows="3" placeholder="Tell us about yourself..."></textarea>
+                <button class="edit-btn" onclick="saveField('about')">Save</button>
+                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('about')">Cancel</button>
             </div>
         </div>
-        
-        <div class="profile-stats">
-            <div class="stat-card">
-                <h3 id="notesCount">24</h3>
-                <p>Notes Shared</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="postsCount">56</h3>
-                <p>Forum Posts</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="coursesCount">5</h3>
-                <p>Courses Taken</p>
+
+        <!-- Subjects -->
+        <div class="glass-card">
+            <div class="detail-group-header"><h3>Subjects of Interest</h3><button class="edit-btn" onclick="toggleEdit('subjects')">Edit</button></div>
+            <div class="detail-content"><p id="subjectsText"></p></div>
+            <div class="edit-form" id="subjectsForm">
+                <input type="text" id="subjectsInput" placeholder="e.g., Math, Physics, Programming">
+                <button class="edit-btn" onclick="saveField('subjects')">Save</button>
+                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('subjects')">Cancel</button>
             </div>
         </div>
-        
-        <div class="progress-container">
-            <div class="progress-text">Profile Completion: <span id="progressPercent">75</span>%</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 75%"></div>
+
+        <!-- Education -->
+        <div class="glass-card">
+            <div class="detail-group-header"><h3>Education</h3><button class="edit-btn" onclick="toggleEdit('education')">Edit</button></div>
+            <div class="detail-content"><p id="schoolText"></p><p id="gpaText"></p></div>
+            <div class="edit-form" id="educationForm">
+                <input type="text" id="schoolInput" placeholder="School/University">
+                <input type="text" id="yearsInput" placeholder="Years attended">
+                <input type="text" id="gpaInput" placeholder="GPA">
+                <button class="edit-btn" onclick="saveField('education')">Save</button>
+                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('education')">Cancel</button>
             </div>
         </div>
-        
-        <div class="badges" id="userBadges">
-            <div class="badge">Active Member</div>
-            <div class="badge">Note Contributor</div>
-            <!-- Badges will be added dynamically -->
+
+        <!-- Social Links -->
+        <div class="glass-card">
+            <div class="detail-group-header"><h3>Social Links</h3><button class="edit-btn" onclick="toggleEdit('social')">Edit</button></div>
+            <div class="detail-content" id="socialLinksDisplay"></div>
+            <div class="edit-form" id="socialForm">
+                <input type="text" id="githubInput" placeholder="GitHub URL">
+                <input type="text" id="linkedinInput" placeholder="LinkedIn URL">
+                <input type="text" id="twitterInput" placeholder="Twitter URL">
+                <button class="edit-btn" onclick="saveField('social')">Save</button>
+                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('social')">Cancel</button>
+            </div>
         </div>
-        
-        <div class="profile-details">
-            <div class="detail-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>About Me</h3>
-                    <button class="btn btn-edit" onclick="toggleEdit('about')">Edit</button>
-                </div>
-                <p id="aboutText">Passionate student interested in Mathematics and Science. I enjoy solving complex problems and sharing knowledge with peers.</p>
-                
-                <div class="edit-form" id="aboutForm">
-                    <div class="form-group">
-                        <label for="aboutInput">About</label>
-                        <textarea id="aboutInput" rows="4">Passionate student interested in Mathematics and Science. I enjoy solving complex problems and sharing knowledge with peers.</textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" onclick="saveProfile('about')">Save</button>
-                        <button class="btn btn-edit" onclick="toggleEdit('about')">Cancel</button>
-                    </div>
-                </div>
+
+        <!-- Account Settings (Avatar, Name, Grade) -->
+        <div class="glass-card">
+            <div class="detail-group-header"><h3>Account Settings</h3><button class="edit-btn" onclick="toggleEdit('account')">Edit</button></div>
+            <div class="detail-content">
+                <p><strong>Avatar:</strong> <span id="avatarStatus">Current image</span></p>
+                <p><strong>Name:</strong> <span id="nameDisplay"></span></p>
+                <p><strong>Grade:</strong> <span id="gradeDisplay"></span></p>
             </div>
-            
-            <div class="detail-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>Subjects of Interest</h3>
-                    <button class="btn btn-edit" onclick="toggleEdit('subjects')">Edit</button>
-                </div>
-                <p id="subjectsText">Mathematics, Physics, Chemistry, Computer Science</p>
-                
-                <div class="edit-form" id="subjectsForm">
-                    <div class="form-group">
-                        <label for="subjectsInput">Subjects (comma separated)</label>
-                        <input type="text" id="subjectsInput" value="Mathematics, Physics, Chemistry, Computer Science">
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" onclick="saveProfile('subjects')">Save</button>
-                        <button class="btn btn-edit" onclick="toggleEdit('subjects')">Cancel</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="detail-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>Education</h3>
-                    <button class="btn btn-edit" onclick="toggleEdit('education')">Edit</button>
-                </div>
-                <p id="educationText">Springfield High School (2021-2025)</p>
-                <p id="gpaText">GPA: 3.8/4.0</p>
-                
-                <div class="edit-form" id="educationForm">
-                    <div class="form-group">
-                        <label for="schoolInput">School</label>
-                        <input type="text" id="schoolInput" value="Springfield High School">
-                    </div>
-                    <div class="form-group">
-                        <label for="yearsInput">Years Attended</label>
-                        <input type="text" id="yearsInput" value="2021-2025">
-                    </div>
-                    <div class="form-group">
-                        <label for="gpaInput">GPA</label>
-                        <input type="text" id="gpaInput" value="3.8">
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" onclick="saveProfile('education')">Save</button>
-                        <button class="btn btn-edit" onclick="toggleEdit('education')">Cancel</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="detail-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>Social Links</h3>
-                    <button class="btn btn-edit" onclick="toggleEdit('social')">Edit</button>
-                </div>
-                <div class="social-links" id="socialLinksDisplay">
-                    <!-- Social links will be displayed here -->
-                </div>
-                
-                <div class="edit-form" id="socialForm">
-                    <div class="form-group">
-                        <label for="githubInput">GitHub</label>
-                        <input type="text" id="githubInput" placeholder="https://github.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="linkedinInput">LinkedIn</label>
-                        <input type="text" id="linkedinInput" placeholder="https://linkedin.com/in/username">
-                    </div>
-                    <div class="form-group">
-                        <label for="twitterInput">Twitter</label>
-                        <input type="text" id="twitterInput" placeholder="https://twitter.com/username">
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" onclick="saveProfile('social')">Save</button>
-                        <button class="btn btn-edit" onclick="toggleEdit('social')">Cancel</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="detail-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>Account Details</h3>
-                    <button class="btn btn-edit" onclick="toggleEdit('account')">Edit</button>
-                </div>
-                <p>Email: <span id="accountEmail">john@example.com</span></p>
-                <p>Member since: <span id="joinDate">June 2023</span></p>
-                <p>Last active: <span id="lastActive">Today</span></p>
-                
-                <div class="edit-form" id="accountForm">
-                    <div class="avatar-upload-container">
-                        <div class="avatar-preview">
-                            <img id="avatarPreview" src="" alt="Preview">
-                        </div>
-                        <div class="avatar-actions">
-                            <button class="btn avatar-upload-btn">
-                                Upload New Photo
-                                <input type="file" id="avatarUpload" accept="image/*" onchange="previewAvatar()">
-                            </button>
-                            <button class="btn btn-remove" onclick="removeAvatar()">Remove</button>
-                        </div>
-                        <small>Max file size: 2MB (JPG, PNG)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="nameInput">Full Name</label>
-                        <input type="text" id="nameInput" value="John Student">
-                    </div>
-                    <div class="form-group">
-                        <label for="gradeInput">Grade Level</label>
-                        <select id="gradeInput">
-                            <option value="9">Grade 9</option>
-                            <option value="10">Grade 10</option>
-                            <option value="11">Grade 11</option>
-                            <option value="12">Grade 12</option>
-                            <option value="college">College</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" onclick="saveProfile('account')">Save</button>
-                        <button class="btn btn-edit" onclick="toggleEdit('account')">Cancel</button>
-                    </div>
-                </div>
+            <div class="edit-form" id="accountForm">
+                <div><label>Upload new avatar</label><input type="file" id="avatarUpload" accept="image/*"></div>
+                <div><label>Full Name</label><input type="text" id="nameInput" placeholder="Full name"></div>
+                <div><label>Grade Level</label><select id="gradeSelect"><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="college">College</option></select></div>
+                <button class="edit-btn" onclick="saveField('account')">Save</button>
+                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('account')">Cancel</button>
             </div>
         </div>
     </div>
 
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Load user data
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = JSON.parse(localStorage.getItem('studyhub_current_user')) || getDefaultUser();
-            const users = JSON.parse(localStorage.getItem('studyhub_users')) || [];
-            
-            if (!currentUser) {
-                alert('Please login first');
+        // ========== 3D BACKGROUND ==========
+        (function init3DBackground() {
+            const container = document.getElementById('threejs-bg');
+            if (!container) return;
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0f1c);
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 8);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            const ambient = new THREE.AmbientLight(0x404060);
+            scene.add(ambient);
+            const pointLight = new THREE.PointLight(0xf97316, 0.8);
+            pointLight.position.set(2, 3, 4);
+            scene.add(pointLight);
+            const fillLight = new THREE.PointLight(0x4c1d95, 0.5);
+            fillLight.position.set(-2, 1, -3);
+            scene.add(fillLight);
+            const geometry = new THREE.TorusKnotGeometry(1.2, 0.3, 200, 32);
+            const material = new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0x4c1d95, roughness: 0.4, metalness: 0.6 });
+            const knot = new THREE.Mesh(geometry, material);
+            scene.add(knot);
+            const particleCount = 1500;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 30;
+                positions[i*3+1] = (Math.random() - 0.5) * 20;
+                positions[i*3+2] = (Math.random() - 0.5) * 20 - 10;
+            }
+            const particleGeo = new THREE.BufferGeometry();
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMat = new THREE.PointsMaterial({ color: 0xfacc15, size: 0.07, transparent: true, opacity: 0.6 });
+            const particles = new THREE.Points(particleGeo, particleMat);
+            scene.add(particles);
+            const starGeo = new THREE.BufferGeometry();
+            const starPos = [];
+            for (let i = 0; i < 2000; i++) {
+                starPos.push((Math.random() - 0.5) * 200);
+                starPos.push((Math.random() - 0.5) * 100);
+                starPos.push((Math.random() - 0.5) * 60 - 20);
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+            const stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
+            function animate() {
+                requestAnimationFrame(animate);
+                knot.rotation.x += 0.005;
+                knot.rotation.y += 0.008;
+                knot.rotation.z += 0.003;
+                particles.rotation.y += 0.0005;
+                stars.rotation.x += 0.0002;
+                renderer.render(scene, camera);
+            }
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        // ========== BACKEND INTEGRATION ==========
+        const API_BASE = "https://studyhub-backend-f15o.onrender.com";
+        let currentUser = null;
+
+        function getToken() { return localStorage.getItem('studyhub_token'); }
+        function getAuthHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
+
+        async function fetchProfile() {
+            const token = getToken();
+            if (!token) { window.location.href = 'login.html'; return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error();
+                currentUser = await res.json();
+                renderProfile();
+            } catch (e) {
+                localStorage.removeItem('studyhub_token');
                 window.location.href = 'login.html';
-                return;
             }
-            
-            // Display user data
-            displayUserProfile(currentUser);
-            
-            // Initialize form values
-            initializeFormValues(currentUser);
-        });
-        
-        function getDefaultUser() {
-            return {
-                id: 'user1',
-                fullname: 'John Student',
-                email: 'john@example.com',
-                grade: '12',
-                avatar: 'J',
-                avatarUrl: '',
-                about: 'Passionate student interested in Mathematics and Science. I enjoy solving complex problems and sharing knowledge with peers.',
-                subjects: ['Mathematics', 'Physics', 'Chemistry', 'Computer Science'],
-                school: 'Springfield High School',
-                years: '2021-2025',
-                gpa: '3.8',
-                social: {
-                    github: '',
-                    linkedin: '',
-                    twitter: ''
-                },
-                stats: {
-                    notes: 24,
-                    posts: 56,
-                    courses: 5
-                },
-                badges: ['Active Member', 'Note Contributor'],
-                joined: new Date().toISOString(),
-                lastActive: new Date().toISOString()
-            };
         }
-        
-        function displayUserProfile(user) {
+
+        function renderProfile() {
+            if (!currentUser) return;
             // Basic info
-            document.getElementById('profileName').textContent = user.fullname;
-            document.getElementById('profileEmail').textContent = user.email;
-            document.getElementById('profileGrade').textContent = `Grade ${user.grade}`;
-            document.getElementById('profileSchool').textContent = user.school || '';
-            document.getElementById('accountEmail').textContent = user.email;
-            
+            document.getElementById('fullname').innerText = currentUser.fullname || 'User';
+            document.getElementById('email').innerText = currentUser.email;
+            document.getElementById('grade').innerText = currentUser.grade ? `Grade ${currentUser.grade}` : '';
+            document.getElementById('nameDisplay').innerText = currentUser.fullname;
+            document.getElementById('gradeDisplay').innerText = currentUser.grade || 'Not set';
             // Avatar
-            updateAvatarDisplay(user);
-            
-            // Dates
-            const joinDate = new Date(user.joined);
-            document.getElementById('joinDate').textContent = joinDate.toLocaleDateString('en-US', { 
-                month: 'long', 
-                year: 'numeric' 
-            });
-            
-            const lastActive = new Date(user.lastActive);
-            document.getElementById('lastActive').textContent = formatLastActive(lastActive);
-            
-            // About and subjects
-            document.getElementById('aboutText').textContent = user.about || 'No information provided.';
-            document.getElementById('subjectsText').textContent = user.subjects?.join(', ') || 'No subjects specified.';
-            
-            // Education
-            document.getElementById('educationText').textContent = user.school ? `${user.school} (${user.years || ''})` : 'No school information.';
-            document.getElementById('gpaText').textContent = user.gpa ? `GPA: ${user.gpa}/4.0` : '';
-            
-            // Stats
-            document.getElementById('notesCount').textContent = user.stats?.notes || 0;
-            document.getElementById('postsCount').textContent = user.stats?.posts || 0;
-            document.getElementById('coursesCount').textContent = user.stats?.courses || 0;
-            
+            const avatarImg = document.getElementById('avatarImg');
+            const avatarInitial = document.getElementById('avatarInitial');
+            if (currentUser.avatarUrl) {
+                avatarImg.src = currentUser.avatarUrl;
+                avatarImg.style.display = 'block';
+                avatarInitial.style.display = 'none';
+            } else {
+                avatarImg.style.display = 'none';
+                avatarInitial.style.display = 'flex';
+                avatarInitial.innerText = currentUser.fullname ? currentUser.fullname.charAt(0).toUpperCase() : 'U';
+            }
+            // About, subjects, education
+            document.getElementById('aboutText').innerText = currentUser.about || 'No information provided.';
+            document.getElementById('subjectsText').innerText = Array.isArray(currentUser.subjects) ? currentUser.subjects.join(', ') : (currentUser.subjects || '');
+            document.getElementById('schoolText').innerHTML = currentUser.school ? `${currentUser.school} ${currentUser.years ? '('+currentUser.years+')' : ''}` : 'Not specified';
+            document.getElementById('gpaText').innerHTML = currentUser.gpa ? `GPA: ${currentUser.gpa}/4.0` : '';
             // Social links
-            displaySocialLinks(user.social);
-            
+            const socialDiv = document.getElementById('socialLinksDisplay');
+            socialDiv.innerHTML = '';
+            if (currentUser.social) {
+                if (currentUser.social.github) socialDiv.innerHTML += `<a href="${currentUser.social.github}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-github"></i> GitHub</a>`;
+                if (currentUser.social.linkedin) socialDiv.innerHTML += `<a href="${currentUser.social.linkedin}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-linkedin"></i> LinkedIn</a>`;
+                if (currentUser.social.twitter) socialDiv.innerHTML += `<a href="${currentUser.social.twitter}" target="_blank" style="color:var(--accent);"><i class="fab fa-twitter"></i> Twitter</a>`;
+                if (!currentUser.social.github && !currentUser.social.linkedin && !currentUser.social.twitter) socialDiv.innerHTML = '<p class="text-dim">No social links added</p>';
+            } else {
+                socialDiv.innerHTML = '<p class="text-dim">No social links added</p>';
+            }
+            // Stats (temporary values – can be extended)
+            document.getElementById('coursesCount').innerText = currentUser.enrolledCourses?.length || 0;
+            document.getElementById('postsCount').innerText = currentUser.postsCount || 0;
+            document.getElementById('notesCount').innerText = currentUser.notesCount || 0;
             // Badges
-            displayBadges(user.badges);
-            
-            // Calculate profile completion
-            calculateProfileCompletion(user);
-        }
-        
-        function displaySocialLinks(social) {
-            const socialLinksContainer = document.getElementById('socialLinks');
-            const socialLinksDisplay = document.getElementById('socialLinksDisplay');
-            
-            socialLinksContainer.innerHTML = '';
-            socialLinksDisplay.innerHTML = '';
-            
-            if (social.github) {
-                addSocialLink(socialLinksContainer, 'github', social.github);
-                addSocialLink(socialLinksDisplay, 'github', social.github);
-            }
-            if (social.linkedin) {
-                addSocialLink(socialLinksContainer, 'linkedin', social.linkedin);
-                addSocialLink(socialLinksDisplay, 'linkedin', social.linkedin);
-            }
-            if (social.twitter) {
-                addSocialLink(socialLinksContainer, 'twitter', social.twitter);
-                addSocialLink(socialLinksDisplay, 'twitter', social.twitter);
-            }
-            
-            if (socialLinksContainer.children.length === 0) {
-                socialLinksContainer.innerHTML = '<p>No social links added</p>';
-            }
-            if (socialLinksDisplay.children.length === 0) {
-                socialLinksDisplay.innerHTML = '<p>No social links added</p>';
-            }
-        }
-        
-        function addSocialLink(container, platform, url) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            
-            let icon;
-            switch(platform) {
-                case 'github':
-                    icon = '🐙';
-                    link.title = 'GitHub';
-                    break;
-                case 'linkedin':
-                    icon = '💼';
-                    link.title = 'LinkedIn';
-                    break;
-                case 'twitter':
-                    icon = '🐦';
-                    link.title = 'Twitter';
-                    break;
-                default:
-                    icon = '🔗';
-            }
-            
-            link.textContent = icon;
-            container.appendChild(link);
-        }
-        
-        function displayBadges(badges) {
-            const badgesContainer = document.getElementById('userBadges');
+            const badgesContainer = document.getElementById('badgesContainer');
             badgesContainer.innerHTML = '';
-            
-            if (!badges || badges.length === 0) {
-                badgesContainer.innerHTML = '<p>No badges yet</p>';
-                return;
+            if (currentUser.badges && currentUser.badges.length) {
+                currentUser.badges.forEach(b => { const span = document.createElement('span'); span.className = 'badge'; span.innerText = b; badgesContainer.appendChild(span); });
+            } else {
+                badgesContainer.innerHTML = '<span class="badge">New Member</span>';
             }
-            
-            badges.forEach(badge => {
-                const badgeElement = document.createElement('div');
-                badgeElement.className = 'badge';
-                badgeElement.textContent = badge;
-                badgesContainer.appendChild(badgeElement);
-            });
-        }
-        
-        function calculateProfileCompletion(user) {
+            // Completion
             let completion = 0;
-            const totalFields = 10; // Total fields we're checking
-            
-            // Check each important field
-            if (user.fullname) completion++;
-            if (user.about) completion++;
-            if (user.subjects && user.subjects.length > 0) completion++;
-            if (user.school) completion++;
-            if (user.gpa) completion++;
-            if (user.avatarUrl) completion++;
-            if (user.social.github || user.social.linkedin || user.social.twitter) completion++;
-            if (user.stats.notes > 0) completion++;
-            if (user.stats.posts > 0) completion++;
-            if (user.stats.courses > 0) completion++;
-            
-            const percent = Math.round((completion / totalFields) * 100);
-            document.getElementById('progressPercent').textContent = percent;
-            document.getElementById('progressFill').style.width = `${percent}%`;
+            if (currentUser.fullname) completion++;
+            if (currentUser.about) completion++;
+            if (currentUser.subjects && currentUser.subjects.length) completion++;
+            if (currentUser.school) completion++;
+            if (currentUser.gpa) completion++;
+            if (currentUser.avatarUrl) completion++;
+            if (currentUser.social && (currentUser.social.github || currentUser.social.linkedin || currentUser.social.twitter)) completion++;
+            const percent = Math.round((completion / 7) * 100);
+            document.getElementById('completionPercent').innerText = percent;
+            document.getElementById('completionFill').style.width = `${percent}%`;
+            // Fill edit forms
+            document.getElementById('aboutInput').value = currentUser.about || '';
+            document.getElementById('subjectsInput').value = Array.isArray(currentUser.subjects) ? currentUser.subjects.join(', ') : (currentUser.subjects || '');
+            document.getElementById('schoolInput').value = currentUser.school || '';
+            document.getElementById('yearsInput').value = currentUser.years || '';
+            document.getElementById('gpaInput').value = currentUser.gpa || '';
+            document.getElementById('githubInput').value = currentUser.social?.github || '';
+            document.getElementById('linkedinInput').value = currentUser.social?.linkedin || '';
+            document.getElementById('twitterInput').value = currentUser.social?.twitter || '';
+            document.getElementById('nameInput').value = currentUser.fullname || '';
+            document.getElementById('gradeSelect').value = currentUser.grade || '12';
         }
-        
-        function formatLastActive(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / (1000 * 60));
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
-            
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-            if (days === 1) return 'Yesterday';
-            if (days < 7) return `${days} days ago`;
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        }
-        
-        function initializeFormValues(user) {
-            // About form
-            document.getElementById('aboutInput').value = user.about || '';
-            
-            // Subjects form
-            document.getElementById('subjectsInput').value = user.subjects?.join(', ') || '';
-            
-            // Education form
-            document.getElementById('schoolInput').value = user.school || '';
-            document.getElementById('yearsInput').value = user.years || '';
-            document.getElementById('gpaInput').value = user.gpa || '';
-            
-            // Social form
-            document.getElementById('githubInput').value = user.social?.github || '';
-            document.getElementById('linkedinInput').value = user.social?.linkedin || '';
-            document.getElementById('twitterInput').value = user.social?.twitter || '';
-            
-            // Account form
-            document.getElementById('nameInput').value = user.fullname || '';
-            document.getElementById('gradeInput').value = user.grade || '12';
-            
-            // Avatar preview
-            if (user.avatarUrl) {
-                document.getElementById('avatarPreview').src = user.avatarUrl;
-            }
-        }
-        
-        function toggleEdit(section) {
-            const form = document.getElementById(`${section}Form`);
-            form.style.display = form.style.display === 'block' ? 'none' : 'block';
-        }
-        
-        function previewAvatar() {
-            const fileInput = document.getElementById('avatarUpload');
-            const preview = document.getElementById('avatarPreview');
-            
-            if (fileInput.files && fileInput.files[0]) {
-                // Check file size (max 2MB)
-                if (fileInput.files[0].size > 2 * 1024 * 1024) {
-                    showToast('File size too large (max 2MB)');
-                    fileInput.value = '';
-                    return;
-                }
-                
-                // Check file type
-                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                if (!validTypes.includes(fileInput.files[0].type)) {
-                    showToast('Please select a valid image file (JPEG, PNG)');
-                    fileInput.value = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                }
-                
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-        
-        function removeAvatar() {
-            const preview = document.getElementById('avatarPreview');
-            const fileInput = document.getElementById('avatarUpload');
-            
-            preview.src = '';
-            fileInput.value = '';
-            
-            // Update the current preview to show removal will happen
-            preview.src = '';
-            showToast('Avatar will be removed when you save changes');
-        }
-        
-        function saveProfile(section) {
-            const currentUser = JSON.parse(localStorage.getItem('studyhub_current_user'));
-            const users = JSON.parse(localStorage.getItem('studyhub_users')) || [];
-            
-            if (section === 'about') {
-                const aboutText = document.getElementById('aboutInput').value;
-                currentUser.about = aboutText;
-                document.getElementById('aboutText').textContent = aboutText;
-            } 
-            else if (section === 'subjects') {
-                const subjectsText = document.getElementById('subjectsInput').value;
-                currentUser.subjects = subjectsText.split(',').map(s => s.trim()).filter(s => s);
-                document.getElementById('subjectsText').textContent = subjectsText;
-            }
-            else if (section === 'education') {
-                currentUser.school = document.getElementById('schoolInput').value;
-                currentUser.years = document.getElementById('yearsInput').value;
-                currentUser.gpa = document.getElementById('gpaInput').value;
-                
-                document.getElementById('educationText').textContent = 
-                    currentUser.school ? `${currentUser.school} (${currentUser.years || ''})` : 'No school information.';
-                document.getElementById('gpaText').textContent = currentUser.gpa ? `GPA: ${currentUser.gpa}/4.0` : '';
-                document.getElementById('profileSchool').textContent = currentUser.school || '';
-            }
-            else if (section === 'social') {
-                currentUser.social = {
+
+        async function saveField(field) {
+            let updateData = {};
+            if (field === 'about') {
+                updateData.about = document.getElementById('aboutInput').value;
+            } else if (field === 'subjects') {
+                const val = document.getElementById('subjectsInput').value;
+                updateData.subjects = val.split(',').map(s => s.trim()).filter(s => s);
+            } else if (field === 'education') {
+                updateData.school = document.getElementById('schoolInput').value;
+                updateData.years = document.getElementById('yearsInput').value;
+                updateData.gpa = document.getElementById('gpaInput').value;
+            } else if (field === 'social') {
+                updateData.social = {
                     github: document.getElementById('githubInput').value,
                     linkedin: document.getElementById('linkedinInput').value,
                     twitter: document.getElementById('twitterInput').value
                 };
-                displaySocialLinks(currentUser.social);
-            }
-            else if (section === 'account') {
-                const name = document.getElementById('nameInput').value;
-                const grade = document.getElementById('gradeInput').value;
-                
-                currentUser.fullname = name;
-                currentUser.grade = grade;
-                currentUser.avatar = name.charAt(0).toUpperCase();
-                
-                // Handle avatar upload
+            } else if (field === 'account') {
+                updateData.fullname = document.getElementById('nameInput').value;
+                updateData.grade = document.getElementById('gradeSelect').value;
                 const fileInput = document.getElementById('avatarUpload');
                 if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    if (file.size > 2*1024*1024) { showToast('File too large', true); return; }
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        currentUser.avatarUrl = e.target.result;
-                        updateAvatarDisplay(currentUser);
-                        updateAvatarInLocalStorage(currentUser);
-                    }
-                    reader.readAsDataURL(fileInput.files[0]);
-                } else if (document.getElementById('avatarPreview').src === '') {
-                    // Avatar was removed
-                    currentUser.avatarUrl = '';
-                    updateAvatarDisplay(currentUser);
-                    updateAvatarInLocalStorage(currentUser);
+                    reader.onload = async function(e) {
+                        updateData.avatarUrl = e.target.result;
+                        await performUpdate(updateData);
+                    };
+                    reader.readAsDataURL(file);
+                    return; // async
                 }
-                
-                document.getElementById('profileName').textContent = name;
-                document.getElementById('profileGrade').textContent = `Grade ${grade}`;
-                updateAvatarDisplay(currentUser);
             }
-            
-            // Update last active
-            currentUser.lastActive = new Date().toISOString();
-            document.getElementById('lastActive').textContent = 'Just now';
-            
-            // Update in users array
-            let userIndex = users.findIndex(u => u.id === currentUser.id);
-            if (userIndex === -1) {
-                users.push(currentUser);
-            } else {
-                users[userIndex] = currentUser;
-            }
-            
-            // Save back to localStorage
-            localStorage.setItem('studyhub_current_user', JSON.stringify(currentUser));
-            localStorage.setItem('studyhub_users', JSON.stringify(users));
-            
-            // Update profile completion
-            calculateProfileCompletion(currentUser);
-            
-            // Hide the form
-            document.getElementById(`${section}Form`).style.display = 'none';
-            
-            // Show success message
-            showToast('Profile updated successfully!');
+            await performUpdate(updateData);
+            toggleEdit(field);
         }
-        
-        function updateAvatarDisplay(user) {
-            const avatarImage = document.getElementById('avatarImage');
-            const avatarInitial = document.getElementById('avatarInitial');
-            
-            if (user.avatarUrl) {
-                avatarImage.src = user.avatarUrl;
-                avatarImage.style.display = 'block';
-                avatarInitial.style.display = 'none';
-            } else {
-                avatarInitial.textContent = user.avatar || user.fullname.charAt(0).toUpperCase();
-                avatarImage.style.display = 'none';
-                avatarInitial.style.display = 'block';
-            }
+
+        async function performUpdate(data) {
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/update`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    currentUser = updated;
+                    localStorage.setItem('studyhub_user', JSON.stringify(updated));
+                    renderProfile();
+                    showToast('Profile updated!');
+                } else {
+                    showToast('Update failed', true);
+                }
+            } catch(e) { showToast('Server error', true); }
         }
-        
-        function updateAvatarInLocalStorage(user) {
-            // Update avatar in all pages by updating localStorage
-            localStorage.setItem('studyhub_current_user_avatar', user.avatarUrl || '');
-            localStorage.setItem('studyhub_current_user_initial', user.avatar || user.fullname.charAt(0).toUpperCase());
+
+        function toggleEdit(section) {
+            const form = document.getElementById(`${section}Form`);
+            if (form) form.style.display = form.style.display === 'block' ? 'none' : 'block';
         }
-        
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.right = '20px';
-            toast.style.backgroundColor = 'var(--primary)';
-            toast.style.color = 'white';
-            toast.style.padding = '12px 24px';
-            toast.style.borderRadius = '4px';
-            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            toast.style.zIndex = '1000';
-            toast.style.transition = 'all 0.3s ease';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateY(0)';
-            }, 10);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
+
+        function showToast(msg, isErr = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = isErr ? 'toast error show' : 'toast show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('studyhub_token');
+            localStorage.removeItem('studyhub_user');
+            window.location.href = 'index.html';
+        });
+
+        fetchProfile();
     </script>
 </body>
 </html>

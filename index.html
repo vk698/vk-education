@@ -385,7 +385,6 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <div class="typewriter"><h1>Learn Without Limits</h1></div>
@@ -397,7 +396,6 @@
         </div>
     </section>
 
-    <!-- Features -->
     <section class="section">
         <div class="section-title"><h2>Why StudyHub?</h2></div>
         <div class="features-grid">
@@ -408,13 +406,11 @@
         </div>
     </section>
 
-    <!-- Dynamic Courses Section -->
     <section class="section">
         <div class="section-title"><h2>Popular Courses</h2></div>
         <div class="cards-grid" id="coursesContainer">Loading courses...</div>
     </section>
 
-    <!-- Testimonials -->
     <section class="section">
         <div class="section-title"><h2>What Our Students Say</h2></div>
         <div class="testimonials-grid">
@@ -424,14 +420,12 @@
         </div>
     </section>
 
-    <!-- Call to Action -->
     <div class="cta">
         <h2>Ready to Transform Your Learning?</h2>
         <p>Join thousands of students already improving their grades.</p>
         <a href="register.html" class="btn btn-primary">Sign Up Free</a>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-social">
             <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -523,7 +517,7 @@
         }
 
         // ========== BACKEND & AUTH ==========
-        const API_BASE = "https://studyhub-backend-f15o.onrender.com"; // ✅ Live backend URL
+        const API_BASE = "https://studyhub-backend-f15o.onrender.com";
         let currentUser = null;
 
         function getToken() { return localStorage.getItem('studyhub_token'); }
@@ -616,7 +610,6 @@
             });
         }
 
-        // Profile dropdown
         function initProfileDropdown() {
             const profileBtn = document.getElementById('profileBtn');
             const dropdown = document.getElementById('profileDropdown');
@@ -637,7 +630,6 @@
             }
         }
 
-        // GSAP & other animations
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
             gsap.utils.toArray('.feature-card, .card, .testimonial-card').forEach(el => {
@@ -674,7 +666,6 @@
             await loadCourses();
             initAnimations();
 
-            // 3D Navigation Buttons
             const toggleBtn = document.getElementById('toggle3dBtn');
             const container = document.getElementById('threejs-container');
             toggleBtn.addEventListener('click', () => {
