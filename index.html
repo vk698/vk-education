@@ -523,7 +523,7 @@
         }
 
         // ========== BACKEND & AUTH ==========
-        const API_BASE = "https://your-backend-url.onrender.com"; // CHANGE TO YOUR ACTUAL BACKEND URL
+        const API_BASE = "https://studyhub-backend-f15o.onrender.com"; // ✅ Live backend URL
         let currentUser = null;
 
         function getToken() { return localStorage.getItem('studyhub_token'); }
@@ -573,6 +573,7 @@
                     });
                 });
             } catch (err) {
+                console.error(err);
                 container.innerHTML = '<div class="text-center">Failed to load courses.</div>';
             }
         }

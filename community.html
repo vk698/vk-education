@@ -73,6 +73,55 @@
         .btn-primary:hover { background: #ff9f4a; transform: scale(0.96); }
         .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
         .btn-outline:hover { background: var(--accent); color: white; }
+
+        /* Profile Dropdown */
+        .profile-container { position: relative; cursor: pointer; }
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
+        }
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2d2d44;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 0.9rem; font-weight: 500; }
+        .profile-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #0f172a;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            width: 220px;
+            display: none;
+            z-index: 200;
+            padding: 0.5rem 0;
+        }
+        .profile-dropdown.show { display: block; }
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .profile-dropdown a:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+        .profile-dropdown .divider { height: 1px; background: var(--glass-border); margin: 0.5rem 0; }
+        .profile-dropdown .logout { color: #f97316; }
+
         .community-hero {
             text-align: center;
             padding: 5rem 2rem;
@@ -317,6 +366,19 @@
             <a href="login.html" class="btn btn-outline">Login</a>
             <a href="register.html" class="btn btn-primary">Sign Up</a>
         </div>
+        <div class="profile-container" id="profileContainer" style="display: none;">
+            <div class="profile-btn" id="profileBtn">
+                <div class="profile-pic"><img src="https://via.placeholder.com/32" alt="Profile" id="profileImage"></div>
+                <div class="profile-name" id="usernameDisplay">User</div>
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="divider"></div>
+                <a href="#" id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -415,20 +477,28 @@
     }
     init3D();
 
-    // ======================== BACKEND CONNECTION ========================
-    const API_BASE = "https://your-backend-url.onrender.com"; // CHANGE THIS TO YOUR ACTUAL BACKEND URL
+    // ======================== BACKEND CONNECTION & AUTH ========================
+    const API_BASE = "https://studyhub-backend-f15o.onrender.com"; // ✅ Live backend URL
     let currentUser = null;
 
     function getToken() { return localStorage.getItem('studyhub_token'); }
     function getAuthHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
+    function isLoggedIn() { return !!getToken(); }
 
+    // Show login prompt and redirect
+    function requireLogin() {
+        alert("Please login to perform this action.");
+        window.location.href = 'login.html';
+        return false;
+    }
+
+    // ----- API Calls with login checks -----
     async function loadAll() {
         await loadPosts();
         await loadGroups();
         await loadEvents();
     }
 
-    // ----- POSTS -----
     async function loadPosts() {
         try {
             const res = await fetch(`${API_BASE}/api/posts`);
@@ -439,7 +509,7 @@
     }
 
     async function createPost(content) {
-        if (!getToken()) { alert("Please login first"); return; }
+        if (!isLoggedIn()) return requireLogin();
         try {
             const res = await fetch(`${API_BASE}/api/posts`, {
                 method: 'POST',
@@ -451,8 +521,8 @@
         } catch(e) { alert("Error"); }
     }
 
-    async function toggleLike(postId, currentLiked) {
-        if (!getToken()) { alert("Login to like"); return; }
+    async function toggleLike(postId) {
+        if (!isLoggedIn()) return requireLogin();
         try {
             const res = await fetch(`${API_BASE}/api/posts/${postId}/like`, {
                 method: 'POST',
@@ -463,7 +533,7 @@
     }
 
     async function addComment(postId, text) {
-        if (!getToken()) { alert("Login to comment"); return; }
+        if (!isLoggedIn()) return requireLogin();
         if (!text.trim()) return;
         try {
             const res = await fetch(`${API_BASE}/api/posts/${postId}/comment`, {
@@ -475,7 +545,6 @@
         } catch(e) { console.error(e); }
     }
 
-    // ----- GROUPS -----
     async function loadGroups() {
         try {
             const res = await fetch(`${API_BASE}/api/groups`);
@@ -485,7 +554,7 @@
     }
 
     async function createGroup(name, subject, image) {
-        if (!getToken()) { alert("Login to create group"); return; }
+        if (!isLoggedIn()) return requireLogin();
         try {
             const res = await fetch(`${API_BASE}/api/groups`, {
                 method: 'POST',
@@ -497,7 +566,6 @@
         } catch(e) { alert("Error"); }
     }
 
-    // ----- EVENTS -----
     async function loadEvents() {
         try {
             const res = await fetch(`${API_BASE}/api/events`);
@@ -507,7 +575,7 @@
     }
 
     async function joinEvent(eventId) {
-        if (!getToken()) { alert("Login to join"); return; }
+        if (!isLoggedIn()) return requireLogin();
         try {
             const res = await fetch(`${API_BASE}/api/events/${eventId}/join`, {
                 method: 'POST',
@@ -548,7 +616,7 @@
             `;
             container.appendChild(postDiv);
             const likeBtn = postDiv.querySelector('.like-btn');
-            likeBtn.addEventListener('click', () => toggleLike(post._id, likedByUser));
+            likeBtn.addEventListener('click', () => toggleLike(post._id));
             const commentToggle = postDiv.querySelector('.comment-toggle');
             const commentsDiv = postDiv.querySelector('.community-post-comments');
             commentToggle.addEventListener('click', () => { commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none'; });
@@ -622,7 +690,7 @@
     const closeGroupModalBtn = document.getElementById('closeGroupModalBtn');
     const cancelGroupModalBtn = document.getElementById('cancelGroupModalBtn');
     const createGroupForm = document.getElementById('createGroupForm');
-    createGroupBtn.addEventListener('click', () => { createGroupModal.style.display = 'flex'; });
+    createGroupBtn.addEventListener('click', () => { if (!isLoggedIn()) { requireLogin(); return; } createGroupModal.style.display = 'flex'; });
     function closeGroupModal() { createGroupModal.style.display = 'none'; }
     closeGroupModalBtn.addEventListener('click', closeGroupModal);
     cancelGroupModalBtn.addEventListener('click', closeGroupModal);
@@ -651,15 +719,60 @@
     document.getElementById('events3dBtn').addEventListener('click', () => alert("Upcoming events list – see sidebar."));
     document.getElementById('chat3dBtn').addEventListener('click', () => alert("Live group chat feature coming soon."));
 
-    // Initialize user and data
-    (async function init() {
+    // Authentication UI update (profile dropdown)
+    async function updateAuthUI() {
         const token = getToken();
         if (token) {
             try {
                 const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (res.ok) currentUser = await res.json();
-            } catch(e) {}
+                if (res.ok) {
+                    currentUser = await res.json();
+                    document.getElementById('authButtons').style.display = 'none';
+                    document.getElementById('profileContainer').style.display = 'block';
+                    document.getElementById('usernameDisplay').innerText = currentUser.fullname.split(' ')[0];
+                    const profileImg = document.getElementById('profileImage');
+                    profileImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.fullname)}&background=f97316&color=fff`;
+                } else {
+                    localStorage.removeItem('studyhub_token');
+                    document.getElementById('authButtons').style.display = 'flex';
+                    document.getElementById('profileContainer').style.display = 'none';
+                }
+            } catch(e) {
+                localStorage.removeItem('studyhub_token');
+                document.getElementById('authButtons').style.display = 'flex';
+                document.getElementById('profileContainer').style.display = 'none';
+            }
+        } else {
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('profileContainer').style.display = 'none';
         }
+    }
+
+    // Profile dropdown logic
+    function initProfileDropdown() {
+        const profileBtn = document.getElementById('profileBtn');
+        const dropdown = document.getElementById('profileDropdown');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', () => dropdown.classList.remove('show'));
+        }
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('studyhub_token');
+                window.location.reload();
+            });
+        }
+    }
+
+    // Initialize everything
+    (async function init() {
+        await updateAuthUI();
+        initProfileDropdown();
         await loadAll();
     })();
 </script>
