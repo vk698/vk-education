@@ -2,1182 +2,384 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHub - 3D Learning Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>StudyHub | Next‑Gen 3D Learning</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <style>
-        /* CSS Reset & Base Styles */
-        :root {
-            --primary: #4a6fa5;
-            --primary-dark: #3a5a8c;
-            --secondary: #ff6b6b;
-            --secondary-dark: #e05555;
-            --dark: #2c3e50;
-            --dark-light: #3a516f;
-            --light: #f0f4f8;
-            --light-dark: #e0e8f0;
-            --text: #333;
-            --text-light: #666;
-            --text-lighter: #999;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
-            --white: #ffffff;
-            --black: #000000;
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
         }
-        
+
+        :root {
+            --bg-dark: #0a0f1c;
+            --bg-card: rgba(15, 23, 42, 0.7);
+            --accent: #f97316;
+            --accent-light: #ff9f4a;
+            --text-light: #f8fafc;
+            --text-dim: #cbd5e1;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            line-height: 1.6;
-            color: var(--text);
-            background-color: #f9f9f9;
+            background: linear-gradient(145deg, #0a0f1c 0%, #0f172a 100%);
+            color: var(--text-light);
             overflow-x: hidden;
+            line-height: 1.5;
         }
-        
-        /* Professional Header/Taskbar */
+
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 2rem;
-            background-color: var(--dark);
-            color: white;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(16px);
+            background: rgba(10, 15, 28, 0.7);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .logo-icon {
+            gap: 0.6rem;
             font-size: 1.8rem;
-            color: var(--secondary);
+            font-weight: 800;
         }
-        
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        
-        .logo-text span {
-            color: var(--secondary);
-        }
-        
-        /* Professional Navigation */
-        .nav-container {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        nav {
-            display: flex;
-            gap: 1.2rem;
-        }
-        
+        .logo i { color: var(--accent); font-size: 2rem; }
+        .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+
+        .nav-container { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+        nav { display: flex; gap: 1.2rem; }
         nav a {
-            color: var(--white);
+            color: var(--text-dim);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 0;
+            transition: 0.2s;
             position: relative;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
+            padding: 0.3rem 0;
         }
-        
-        nav a i {
-            font-size: 0.9rem;
-        }
-        
+        nav a:hover, nav a.active { color: var(--accent); }
         nav a::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -2px;
             left: 0;
             width: 0;
             height: 2px;
-            background-color: var(--secondary);
-            transition: width 0.3s ease;
+            background: var(--accent);
+            transition: 0.3s;
         }
-        
-        nav a:hover::after {
-            width: 100%;
-        }
-        
-        nav a.active {
-            color: var(--secondary);
-        }
-        
-        nav a.active::after {
-            width: 100%;
-        }
-        
-        /* User Controls */
-        .user-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .search-bar {
-            position: relative;
-            margin-right: 1rem;
-        }
-        
+        nav a:hover::after, nav a.active::after { width: 100%; }
+
+        .user-controls { display: flex; gap: 1rem; align-items: center; }
+        .search-bar { position: relative; }
         .search-bar input {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
             padding: 0.5rem 1rem 0.5rem 2.2rem;
-            border-radius: 20px;
-            border: none;
-            background-color: var(--dark-light);
             color: white;
             width: 200px;
-            transition: width 0.3s;
+            transition: 0.3s;
         }
-        
-        .search-bar input:focus {
-            outline: none;
-            width: 250px;
-            background-color: var(--dark-light);
-        }
-        
-        .search-bar i {
-            position: absolute;
-            left: 0.8rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-lighter);
-            font-size: 0.9rem;
-        }
-        
+        .search-bar input:focus { width: 260px; background: rgba(255,255,255,0.12); outline: none; }
+        .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; }
+
         .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 4px;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
             font-weight: 500;
+            transition: 0.2s;
             cursor: pointer;
-            transition: all 0.3s ease;
             border: none;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
         }
-        
-        .btn-primary {
-            background-color: var(--secondary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--white);
-            color: white;
-        }
-        
-        .btn-outline:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-outline:hover { background: var(--accent); color: white; transform: scale(0.96); }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-light); transform: scale(0.96); }
+
         /* Profile Dropdown */
-        .profile-container {
-            position: relative;
-        }
-        
+        .profile-container { position: relative; cursor: pointer; }
         .profile-btn {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            background-color: var(--dark-light);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
         }
-        
-        .profile-btn:hover {
-            background-color: var(--primary);
-        }
-        
         .profile-pic {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background-color: #eee;
+            background: #2d2d44;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
         }
-        
-        .profile-pic img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .profile-name {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 0.9rem; font-weight: 500; }
         .profile-dropdown {
             position: absolute;
             top: 50px;
             right: 0;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            width: 280px;
-            z-index: 1000;
+            background: #0f172a;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            width: 220px;
             display: none;
-            overflow: hidden;
+            z-index: 200;
+            padding: 0.5rem 0;
         }
-        
-        .profile-dropdown.show {
-            display: block;
-        }
-        
-        .profile-header {
-            padding: 1.2rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .profile-header .profile-pic {
-            width: 50px;
-            height: 50px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        
-        .profile-info h4 {
-            margin-bottom: 0.2rem;
-            font-size: 1rem;
-        }
-        
-        .profile-info p {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-        
-        .profile-menu {
-            list-style: none;
-        }
-        
-        .profile-menu li {
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .profile-menu li:last-child {
-            border-bottom: none;
-        }
-        
-        .profile-menu a {
+        .profile-dropdown.show { display: block; }
+        .profile-dropdown a {
             display: flex;
             align-items: center;
             gap: 0.8rem;
-            padding: 0.8rem 1.2rem;
-            color: var(--text);
+            padding: 0.8rem 1rem;
+            color: var(--text-dim);
             text-decoration: none;
-            transition: background-color 0.3s;
-            font-size: 0.9rem;
+            transition: 0.2s;
         }
-        
-        .profile-menu a:hover {
-            background-color: var(--light);
-        }
-        
-        .profile-menu a i {
-            width: 20px;
-            text-align: center;
-            color: var(--primary);
-        }
-        
-        .profile-menu .divider {
-            height: 1px;
-            background-color: rgba(0,0,0,0.1);
-            margin: 0.5rem 0;
-        }
-        
-        .profile-menu .logout {
-            color: var(--danger);
-        }
-        
-        .profile-menu .logout i {
-            color: var(--danger);
-        }
-        
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--secondary);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Hero Section */
+        .profile-dropdown a:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+        .profile-dropdown .divider { height: 1px; background: var(--glass-border); margin: 0.5rem 0; }
+        .profile-dropdown .logout { color: #f97316; }
+
         .hero {
             text-align: center;
             padding: 6rem 2rem 5rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            position: relative;
+            background: radial-gradient(ellipse at 30% 30%, rgba(249,115,22,0.15), transparent 70%);
+        }
+        .hero-content { max-width: 800px; margin: 0 auto; }
+        .typewriter h1 {
+            font-size: 3.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--accent), #facc15);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            white-space: nowrap;
             overflow: hidden;
+            border-right: 3px solid var(--accent);
+            width: 0;
+            animation: typing 3s steps(30, end) forwards, blink 0.7s step-end infinite;
         }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwYXR0ZXJuKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==');
-        }
-        
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .hero h1 {
-            font-size: 2.8rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-        
-        .hero-btn {
-            padding: 0.8rem 1.8rem;
-            border-radius: 30px;
-            font-weight: 500;
-            font-size: 1rem;
-        }
-        
-        .hero-btn-primary {
-            background-color: var(--secondary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255,107,107,0.3);
-        }
-        
-        .hero-btn-outline {
-            background-color: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-        
-        .hero-btn-primary:hover {
-            background-color: var(--secondary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
-        }
-        
-        .hero-btn-outline:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        
-        /* Main Content Sections */
-        .section {
-            padding: 5rem 2rem;
-        }
-        
-        .section.small-padding {
-            padding: 3rem 2rem;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .section-title h2 {
-            font-size: 2.2rem;
-            color: var(--dark);
-            margin-bottom: 1rem;
-            position: relative;
-            display: inline-block;
-            font-weight: 700;
-        }
-        
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background-color: var(--secondary);
-            border-radius: 2px;
-        }
-        
-        .section-title p {
-            color: var(--text-light);
-            max-width: 700px;
-            margin: 0 auto;
-            font-size: 1.1rem;
-        }
-        
-        /* Cards Grid */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        
-        .card-img {
-            height: 180px;
-            background-color: #eee;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card-img::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
-        }
-        
-        .card-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: var(--secondary);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            z-index: 1;
-        }
-        
-        .card-content {
-            padding: 1.8rem;
-        }
-        
-        .card h3 {
-            color: var(--dark);
-            margin-bottom: 0.8rem;
-            font-size: 1.3rem;
-        }
-        
-        .card p {
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-        
-        .card-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-lighter);
-        }
-        
-        .card-meta i {
-            font-size: 0.8rem;
-        }
-        
-        .card-btn {
-            padding: 0.5rem 1.2rem;
-            font-size: 0.9rem;
-        }
-        
-        /* Features Section */
-        .features {
-            background-color: var(--light);
-        }
-        
+        @keyframes typing { from { width: 0; } to { width: 100%; } }
+        @keyframes blink { 50% { border-color: transparent; } }
+        .hero p { font-size: 1.2rem; margin: 1.5rem 0 2rem; color: var(--text-dim); }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        .section { padding: 5rem 2rem; }
+        .section-title { text-align: center; margin-bottom: 3rem; }
+        .section-title h2 { font-size: 2.4rem; background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
         }
-        
         .feature-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 2rem;
             text-align: center;
-            padding: 2.5rem 2rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
         }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
+        .feature-card:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5); }
         .feature-icon {
-            width: 80px;
-            height: 80px;
-            background-color: rgba(74, 111, 165, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            color: var(--primary);
-            font-size: 2rem;
-            transition: all 0.3s;
-        }
-        
-        .feature-card:hover .feature-icon {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .feature-card h3 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, var(--accent), #ffb347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             margin-bottom: 1rem;
-            color: var(--dark);
-            font-size: 1.2rem;
+            display: inline-block;
         }
-        
-        .feature-card p {
-            color: var(--text-light);
-            font-size: 0.95rem;
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1280px;
+            margin: 2rem auto;
         }
-        
-        /* Testimonials */
-        .testimonials {
-            background-color: var(--light);
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s;
         }
-        
+        .card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 35px -10px rgba(0,0,0,0.4); }
+        .card-img { height: 200px; background-size: cover; background-position: center; position: relative; }
+        .card-badge { position: absolute; top: 1rem; right: 1rem; background: var(--accent); padding: 0.25rem 0.8rem; border-radius: 30px; font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(4px); }
+        .card-content { padding: 1.5rem; }
+        .card-content h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .card-content p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1rem; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+        .card-btn { background: var(--accent); border: none; padding: 0.4rem 1.2rem; border-radius: 40px; color: white; font-weight: 500; transition: 0.2s; cursor: pointer; text-decoration: none; display: inline-block; }
+        .card-btn:hover { background: var(--accent-light); transform: scale(0.96); }
+
         .testimonials-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
         }
-        
         .testimonial-card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 1.8rem;
+            border-left: 4px solid var(--accent);
         }
-        
-        .testimonial-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .testimonial-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #eee;
-            margin-right: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-        
-        .testimonial-meta h4 {
-            color: var(--dark);
-            margin-bottom: 0.3rem;
-        }
-        
-        .testimonial-meta p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-        
-        .testimonial-rating {
-            color: var(--warning);
-            margin-top: 0.3rem;
-            font-size: 0.9rem;
-        }
-        
-        .testimonial-content {
-            color: var(--text-light);
-            font-style: italic;
-            position: relative;
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-        
-        .testimonial-content::before {
-            content: '"';
-            font-size: 3rem;
-            color: rgba(0,0,0,0.1);
-            position: absolute;
-            top: -1.5rem;
-            left: -1rem;
-            line-height: 1;
-        }
-        
-       
+
         .cta {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
+            background: linear-gradient(115deg, #1e1b4b, var(--accent));
+            border-radius: 48px;
+            margin: 2rem 2rem 0;
+            padding: 3rem 2rem;
             text-align: center;
-            padding: 5rem 2rem;
-            position: relative;
-            overflow: hidden;
         }
-        
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwYXR0ZXJuKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==');
-        }
-        
-        .cta-content {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .cta h2 {
-            font-size: 2.2rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .cta p {
-            font-size: 1.1rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-        
-       
+        .cta h2 { font-size: 2rem; margin-bottom: 1rem; }
+        .cta .btn-primary { background: white; color: #0f172a; }
+
         footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 4rem 0 0;
-        }
-        
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-        
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-        
-        .footer-col h3 {
-            color: white;
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 0.8rem;
-        }
-        
-        .footer-col h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 2px;
-            background-color: var(--secondary);
-        }
-        
-        .footer-about p {
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-        
-        .footer-links a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .footer-links a i {
-            font-size: 0.8rem;
-            transition: all 0.3s;
-        }
-        
-        .footer-links a:hover {
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .footer-links a:hover i {
-            color: var(--secondary);
-        }
-        
-        .footer-contact p {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.8rem;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 1rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        
-        .footer-contact i {
-            margin-top: 0.2rem;
-            color: var(--secondary);
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .social-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            color: white;
-            font-size: 1rem;
-        }
-        
-        .social-link:hover {
-            background-color: var(--secondary);
-            transform: translateY(-3px);
-        }
-        
-        .footer-bottom {
-            background-color: rgba(0,0,0,0.2);
-            padding: 1.5rem 0;
+            background: #030712;
+            padding: 2rem;
+            margin-top: 4rem;
             text-align: center;
+            color: #94a3b8;
         }
-        
-        .footer-bottom p {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
+        .footer-social {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
         }
-        
-        .footer-bottom a {
-            color: var(--secondary);
-            text-decoration: none;
+        .footer-social a {
+            color: #cbd5e1;
+            font-size: 1.4rem;
+            transition: 0.2s;
         }
-        
-       
+        .footer-social a:hover { color: var(--accent); transform: translateY(-3px); }
+
         #threejs-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            opacity: 0.2;
+            z-index: -2;
+            opacity: 0.3;
             transition: opacity 0.5s;
+            pointer-events: none;
         }
-        
-        #threejs-container.active {
-            opacity: 1;
-            z-index: 1;
-        }
-        
-       
         .nav-3d {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
             display: flex;
-            gap: 15px;
-            background-color: rgba(0,0,0,0.7);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
+            gap: 0.8rem;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+            border: 1px solid var(--glass-border);
         }
-        
         .nav-3d-btn {
-            width: 50px;
-            height: 50px;
+            background: #2d2d44;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            transition: 0.2s;
+            color: white;
             font-size: 1.2rem;
-            border: 2px solid rgba(255,255,255,0.2);
         }
-        
-        .nav-3d-btn:hover {
-            transform: translateY(-5px) scale(1.1);
-            background-color: var(--secondary);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-        }
-        
-        
-        .content-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            z-index: 1001;
-            max-width: 700px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .overlay-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        .overlay-title {
-            font-size: 1.5rem;
-            color: var(--dark);
-            font-weight: 600;
-        }
-        
-        .close-overlay {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-light);
-            transition: color 0.3s;
-        }
-        
-        .close-overlay:hover {
-            color: var(--secondary);
-        }
-        
-        
-        @media (max-width: 1024px) {
-            .hero h1 {
-                font-size: 2.4rem;
-            }
-            
-            .section-title h2 {
-                font-size: 2rem;
-            }
-        }
-        
+        .nav-3d-btn:hover { background: var(--accent); transform: scale(1.1); }
+
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 1rem;
-                gap: 1rem;
-            }
-            
-            .nav-container {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            nav {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-            }
-            
-            .hero {
-                padding: 5rem 1rem 4rem;
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero p {
-                font-size: 1.1rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .section {
-                padding: 4rem 1rem;
-            }
-            
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-            
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+            header { padding: 0.8rem 1rem; }
+            .typewriter h1 { font-size: 2rem; white-space: normal; border: none; animation: none; background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; }
+            .hero { padding: 4rem 1rem; }
+            .section { padding: 3rem 1rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .search-bar input { width: 140px; }
+            .search-bar input:focus { width: 180px; }
+            .cta { margin: 1rem; padding: 2rem 1rem; }
+            .nav-3d { gap: 0.5rem; padding: 0.4rem 0.8rem; }
+            .nav-3d-btn { width: 38px; height: 38px; font-size: 1rem; }
         }
-        
-        @media (max-width: 576px) {
-            .search-bar {
-                display: none;
-            }
-            
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-3d {
-                padding: 0.5rem 1rem;
-                gap: 10px;
-            }
-            
-            .nav-3d-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
+        @media (max-width: 480px) {
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .user-controls { gap: 0.5rem; }
         }
-        
-        /* Utility Classes */
-        .text-center {
-            text-align: center;
-        }
-        
-        .mt-1 { margin-top: 1rem; }
-        .mt-2 { margin-top: 2rem; }
-        .mt-3 { margin-top: 3rem; }
-        .mt-4 { margin-top: 4rem; }
-        .mt-5 { margin-top: 5rem; }
-        
-        .mb-1 { margin-bottom: 1rem; }
-        .mb-2 { margin-bottom: 2rem; }
-        .mb-3 { margin-bottom: 3rem; }
-        .mb-4 { margin-bottom: 4rem; }
-        .mb-5 { margin-bottom: 5rem; }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
-        
-        .delay-1 { animation-delay: 0.2s; }
-        .delay-2 { animation-delay: 0.4s; }
-        .delay-3 { animation-delay: 0.6s; }
-        .delay-4 { animation-delay: 0.8s; }
     </style>
 </head>
 <body>
-    
     <div id="threejs-container"></div>
-    
-   
-    <div class="nav-3d" id="nav3d">
+    <div class="nav-3d">
         <div class="nav-3d-btn" id="home3dBtn"><i class="fas fa-home"></i></div>
         <div class="nav-3d-btn" id="courses3dBtn"><i class="fas fa-book"></i></div>
         <div class="nav-3d-btn" id="community3dBtn"><i class="fas fa-users"></i></div>
         <div class="nav-3d-btn" id="profile3dBtn"><i class="fas fa-user"></i></div>
         <div class="nav-3d-btn" id="toggle3dBtn"><i class="fas fa-cube"></i></div>
     </div>
-    
-    <div class="content-overlay" id="contentOverlay">
-        <div class="overlay-header">
-            <h3 class="overlay-title" id="overlayTitle"></h3>
-            <button class="close-overlay" id="closeOverlay">&times;</button>
-        </div>
-        <div id="overlayContent"></div>
-    </div>
-    
-    
+
     <header>
-        <div class="logo">
-            <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
-            <div class="logo-text">Study<span>Hub</span></div>
-        </div>
-        
+        <div class="logo"><i class="fas fa-graduation-cap"></i> <span>StudyHub</span></div>
         <div class="nav-container">
             <nav>
-                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="courses.html"><i class="fas fa-book"></i> Courses</a>
-                <a href="notes.html"><i class="fas fa-file-alt"></i> Notes</a>
-                <a href="community.html"><i class="fas fa-users"></i> Community</a>
-                <a href="exams.html"><i class="fas fa-clipboard-list"></i> Exams</a>
+                <a href="index.html" class="active">Home</a>
+                <a href="courses.html">Courses</a>
+                <a href="notes.html">Notes</a>
+                <a href="community.html">Community</a>
+                <a href="exams.html">Exams</a>
             </nav>
-            
             <div class="user-controls">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
+                <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search..."></div>
+                <div class="auth-buttons" id="authButtons">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                    <a href="register.html" class="btn btn-primary">Sign Up</a>
                 </div>
-                
                 <div class="profile-container" id="profileContainer" style="display: none;">
                     <div class="profile-btn" id="profileBtn">
-                        <div class="profile-pic">
-                            <img src="https://via.placeholder.com/40" alt="Profile" id="profileImage">
-                            <div class="notification-badge" id="notificationBadge" style="display: none;">3</div>
-                        </div>
-                        <div class="profile-name" id="usernameDisplay">John</div>
+                        <div class="profile-pic"><img src="https://via.placeholder.com/32" alt="Profile" id="profileImage"></div>
+                        <div class="profile-name" id="usernameDisplay">User</div>
                     </div>
-                    
                     <div class="profile-dropdown" id="profileDropdown">
-                        <div class="profile-header">
-                            <div class="profile-pic">
-                                <img src="https://via.placeholder.com/50" alt="Profile" id="dropdownProfileImage">
-                            </div>
-                            <div class="profile-info">
-                                <h4 id="dropdownUsername">John Doe</h4>
-                                <p id="dropdownUserEmail">john@example.com</p>
-                            </div>
-                        </div>
-                        
-                        <ul class="profile-menu">
-                            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
-                            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                            <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages <span class="notification-badge" id="messageBadge" style="margin-left: auto;">2</span></a></li>
-                            <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
-                            <li class="divider"></li>
-                            <li><a href="premium.html"><i class="fas fa-crown"></i> Go Premium</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                        </ul>
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="divider"></div>
+                        <a href="#" id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
-                </div>
-                
-                <div class="auth-buttons" id="authButtons">
-                    <a href="login.html" class="btn btn-outline"><i class="fas fa-sign-in-alt"></i> Login</a>
-                    <a href="register.html" class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</a>
                 </div>
             </div>
         </div>
@@ -1185,795 +387,310 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content fade-in">
-            <h1>Learn Without Limits</h1>
-            <p>Access free educational resources, connect with peers, and prepare for exams with our comprehensive learning platform designed for modern students.</p>
+        <div class="hero-content">
+            <div class="typewriter"><h1>Learn Without Limits</h1></div>
+            <p>Immersive 3D courses, AI‑powered learning, and a global community — all free.</p>
             <div class="hero-buttons">
-                <a href="register.html" class="hero-btn hero-btn-primary"><i class="fas fa-rocket"></i> Get Started</a>
-                <a href="courses.html" class="hero-btn hero-btn-outline"><i class="fas fa-book-open"></i> Explore Courses</a>
+                <a href="register.html" class="btn btn-primary">Get Started</a>
+                <a href="courses.html" class="btn btn-outline">Explore Courses</a>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="section features">
-        <div class="section-title fade-in">
-            <h2>Why Choose StudyHub?</h2>
-            <p>We provide everything you need to succeed in your academic journey</p>
-        </div>
+    <!-- Features -->
+    <section class="section">
+        <div class="section-title"><h2>Why StudyHub?</h2></div>
         <div class="features-grid">
-            <div class="feature-card fade-in delay-1">
-                <div class="feature-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <h3>Comprehensive Notes</h3>
-                <p>Access high-quality notes shared by top students and teachers across all subjects and grade levels.</p>
-            </div>
-            <div class="feature-card fade-in delay-2">
-                <div class="feature-icon">
-                    <i class="fas fa-video"></i>
-                </div>
-                <h3>Video Lessons</h3>
-                <p>Learn complex concepts quickly with our bite-sized video tutorials from expert educators.</p>
-            </div>
-            <div class="feature-card fade-in delay-3">
-                <div class="feature-icon">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h3>Interactive Community</h3>
-                <p>Connect with fellow students, ask questions, and get help from a community of learners.</p>
-            </div>
-            <div class="feature-card fade-in delay-4">
-                <div class="feature-icon">
-                    <i class="fas fa-clipboard-check"></i>
-                </div>
-                <h3>Exam Preparation</h3>
-                <p>Practice with past papers, mock tests, and customized study plans for all major exams.</p>
-            </div>
+            <div class="feature-card"><i class="fas fa-file-alt feature-icon"></i><h3>Comprehensive Notes</h3><p>Top‑quality notes shared by educators and peers.</p></div>
+            <div class="feature-card"><i class="fas fa-video feature-icon"></i><h3>Video Lessons</h3><p>Short, engaging videos that make complex ideas simple.</p></div>
+            <div class="feature-card"><i class="fas fa-users feature-icon"></i><h3>Interactive Community</h3><p>Ask questions, discuss, and learn together.</p></div>
+            <div class="feature-card"><i class="fas fa-chalkboard feature-icon"></i><h3>Exam Preparation</h3><p>Mock tests, past papers, and personalized plans.</p></div>
         </div>
     </section>
 
-    <!-- Courses Section -->
+    <!-- Dynamic Courses Section -->
     <section class="section">
-        <div class="section-title fade-in">
-            <h2>Popular Courses</h2>
-            <p>Explore our collection of free courses across various subjects</p>
-        </div>
-        <div class="cards-grid">
-            <div class="card fade-in delay-1">
-                <div class="card-img" style="background-image: linear-gradient(to right, #4a6fa5, #6a8fc7); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-square-root-alt"></i>
-                </div>
-                <div class="card-content">
-                    <div class="card-badge">New</div>
-                    <h3>Mathematics Fundamentals</h3>
-                    <p>Master the basics of algebra, geometry, and calculus with our comprehensive math course designed for all skill levels.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-clock"></i> 12 Hours
-                        </div>
-                        <a href="course-math.html" class="btn btn-primary card-btn">Start Learning</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card fade-in delay-2">
-                <div class="card-img" style="background-image: linear-gradient(to right, #4CAF50, #8BC34A); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-dna"></i>
-                </div>
-                <div class="card-content">
-                    <h3>Biology Essentials</h3>
-                    <p>Explore the wonders of life with our biology course covering cells, genetics, ecosystems, and human anatomy.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-clock"></i> 8 Hours
-                        </div>
-                        <a href="course-biology.html" class="btn btn-primary card-btn">Start Learning</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card fade-in delay-3">
-                <div class="card-img" style="background-image: linear-gradient(to right, #FF5722, #FF9800); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-landmark"></i>
-                </div>
-                <div class="card-content">
-                    <div class="card-badge">Popular</div>
-                    <h3>World History</h3>
-                    <p>Journey through time with our comprehensive overview of world civilizations and major historical events.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-clock"></i> 10 Hours
-                        </div>
-                        <a href="course-history.html" class="btn btn-primary card-btn">Start Learning</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-4">
-            <a href="courses.html" class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);">View All Courses</a>
-        </div>
+        <div class="section-title"><h2>Popular Courses</h2></div>
+        <div class="cards-grid" id="coursesContainer">Loading courses...</div>
     </section>
 
-    <!-- Notes Section -->
+    <!-- Testimonials -->
     <section class="section">
-        <div class="section-title fade-in">
-            <h2>Recently Added Notes</h2>
-            <p>Download and share study notes with the community</p>
-        </div>
-        <div class="cards-grid">
-            <div class="card fade-in delay-1">
-                <div class="card-content">
-                    <h3>Algebra Cheat Sheet</h3>
-                    <p>All essential algebra formulas and concepts summarized in one document for quick revision before exams.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-download"></i> 1.2MB PDF
-                        </div>
-                        <a href="note-algebra.html" class="btn btn-primary card-btn">Download</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card fade-in delay-2">
-                <div class="card-content">
-                    <h3>Cell Biology Notes</h3>
-                    <p>Detailed notes on cell structure, organelles, and functions with labeled diagrams and explanations.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-download"></i> 2.4MB PDF
-                        </div>
-                        <a href="note-biology.html" class="btn btn-primary card-btn">Download</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card fade-in delay-3">
-                <div class="card-content">
-                    <h3>French Grammar Guide</h3>
-                    <p>Complete reference for French grammar rules, verb conjugations, and common phrases with examples.</p>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-download"></i> 1.8MB PDF
-                        </div>
-                        <a href="note-french.html" class="btn btn-primary card-btn">Download</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-4">
-            <a href="notes.html" class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);">Browse All Notes</a>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="section testimonials">
-        <div class="section-title fade-in">
-            <h2>What Our Students Say</h2>
-            <p>Hear from our community of learners who have transformed their education with StudyHub</p>
-        </div>
+        <div class="section-title"><h2>What Our Students Say</h2></div>
         <div class="testimonials-grid">
-            <div class="testimonial-card fade-in delay-1">
-                <div class="testimonial-header">
-                    <div class="testimonial-avatar">AM</div>
-                    <div class="testimonial-meta">
-                        <h4>Ananya M.</h4>
-                        <p>Grade 12 Student</p>
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-content">
-                    StudyHub helped me improve my math grades from a C to an A in just three months. The notes are so well organized and the community is always willing to help when I have questions. The video explanations made complex concepts so much easier to understand!
-                </div>
-            </div>
-            <div class="testimonial-card fade-in delay-2">
-                <div class="testimonial-header">
-                    <div class="testimonial-avatar">RS</div>
-                    <div class="testimonial-meta">
-                        <h4>Rahul S.</h4>
-                        <p>JEE Aspirant</p>
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-content">
-                    The past year question papers and solutions on StudyHub were invaluable for my JEE preparation. I couldn't have done it without this resource! The mock tests helped me identify my weak areas and the detailed solutions improved my problem-solving approach.
-                </div>
-            </div>
-            <div class="testimonial-card fade-in delay-3">
-                <div class="testimonial-header">
-                    <div class="testimonial-avatar">PT</div>
-                    <div class="testimonial-meta">
-                        <h4>Priya T.</h4>
-                        <p>College Freshman</p>
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-content">
-                    As someone who learns better from video explanations, the short video lessons were perfect for me. They helped me understand complex concepts quickly during my first year of college. The ability to pause and rewatch difficult sections was a game-changer for my learning.
-                </div>
-            </div>
+            <div class="testimonial-card"><i class="fas fa-quote-left" style="color:#f97316; margin-bottom:0.8rem; display:inline-block"></i> <p>StudyHub turned my grades around. The 3D modules are a game changer!</p> <strong>- Ananya M.</strong></div>
+            <div class="testimonial-card"><i class="fas fa-quote-left" style="color:#f97316; margin-bottom:0.8rem; display:inline-block"></i> <p>The community support and exam prep helped me crack JEE.</p> <strong>- Rahul S.</strong></div>
+            <div class="testimonial-card"><i class="fas fa-quote-left" style="color:#f97316; margin-bottom:0.8rem; display:inline-block"></i> <p>Finally a platform that makes learning addictive and fun.</p> <strong>- Priya T.</strong></div>
         </div>
     </section>
 
     <!-- Call to Action -->
-    <section class="cta">
-        <div class="cta-content">
-            <h2>Ready to Transform Your Learning?</h2>
-            <p>Join thousands of students who are already improving their grades and mastering subjects with StudyHub</p>
-            <div class="cta-buttons">
-                <a href="register.html" class="btn btn-primary" style="background-color: white; color: var(--primary); margin-right: 1rem; padding: 0.8rem 1.8rem;" id="ctaSignup"><i class="fas fa-user-plus"></i> Sign Up Free</a>
-                <a href="courses.html" class="btn btn-outline" style="padding: 0.8rem 1.8rem;"><i class="fas fa-book-open"></i> Browse Courses</a>
-            </div>
-        </div>
-    </section>
+    <div class="cta">
+        <h2>Ready to Transform Your Learning?</h2>
+        <p>Join thousands of students already improving their grades.</p>
+        <a href="register.html" class="btn btn-primary">Sign Up Free</a>
+    </div>
 
-    <!-- Professional Footer -->
+    <!-- Footer -->
     <footer>
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>About StudyHub</h3>
-                    <div class="footer-about">
-                        <p>StudyHub is a comprehensive learning platform dedicated to providing free, high-quality educational resources to students worldwide.</p>
-                        <div class="social-links">
-                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="index.html"><i class="fas fa-chevron-right"></i> Home</a></li>
-                        <li><a href="courses.html"><i class="fas fa-chevron-right"></i> Courses</a></li>
-                        <li><a href="notes.html"><i class="fas fa-chevron-right"></i> Study Notes</a></li>
-                        <li><a href="exams.html"><i class="fas fa-chevron-right"></i> Exam Papers</a></li>
-                        <li><a href="community.html"><i class="fas fa-chevron-right"></i> Community</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Support</h3>
-                    <ul class="footer-links">
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Help Center</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Feedback</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Report Issue</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Contact Info</h3>
-                    <div class="footer-contact">
-                        <p><i class="fas fa-map-marker-alt"></i> </p>
-                        <p><i class="fas fa-phone-alt"></i> +91 8789297252</p>
-                        <p><i class="fas fa-envelope"></i> vishalkumar2257r@gmail.com</p>
-                    </div>
-                </div>
-            </div>
+        <div class="footer-social">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
         </div>
-        
-        <div class="footer-bottom">
-            <div class="footer-container">
-                <p>&copy; 2023 StudyHub. All Rights Reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-            </div>
-        </div>
+        <p>&copy; 2025 StudyHub. All rights reserved. | Built with 🚀 for learners</p>
     </footer>
 
-    <!-- Three.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    <!-- GSAP for animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
-        // 3D Scene Variables
-        let scene, camera, renderer, controls;
+        // ========== 3D SCENE ==========
+        let scene, camera, renderer, controls, torusKnot, particles;
         let is3DModeActive = false;
-        
-        // Initialize 3D Scene
-        function init3DScene() {
-            // Create scene
+
+        function init3D() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf0f4f8);
-            
-            // Create camera
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 5;
-            
-            // Create renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            scene.background = new THREE.Color(0x0a0f1c);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 8);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('threejs-container').appendChild(renderer.domElement);
-            
-         
+
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            
-          
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(1, 1, 1);
-            scene.add(directionalLight);
-            
-          
-            createLearningEnvironment();
-            
-           
-            window.addEventListener('resize', onWindowResize);
+            controls.enableZoom = false;
+            controls.autoRotate = false;
+
+            const ambient = new THREE.AmbientLight(0x404060);
+            scene.add(ambient);
+            const pointLight = new THREE.PointLight(0xf97316, 1);
+            pointLight.position.set(2, 3, 4);
+            scene.add(pointLight);
+            const fillLight = new THREE.PointLight(0x4c1d95, 0.6);
+            fillLight.position.set(-2, 1, -3);
+            scene.add(fillLight);
+
+            const geometry = new THREE.TorusKnotGeometry(1.2, 0.32, 200, 32);
+            const material = new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0x4c1d95, roughness: 0.3, metalness: 0.7 });
+            torusKnot = new THREE.Mesh(geometry, material);
+            scene.add(torusKnot);
+
+            const particleCount = 1800;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 32;
+                positions[i*3+1] = (Math.random() - 0.5) * 22;
+                positions[i*3+2] = (Math.random() - 0.5) * 20 - 10;
+            }
+            const particleGeo = new THREE.BufferGeometry();
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMat = new THREE.PointsMaterial({ color: 0xfacc15, size: 0.07, transparent: true, opacity: 0.5 });
+            particles = new THREE.Points(particleGeo, particleMat);
+            scene.add(particles);
+
+            const starGeo = new THREE.BufferGeometry();
+            const starPos = [];
+            for (let i = 0; i < 2500; i++) {
+                starPos.push((Math.random() - 0.5) * 200);
+                starPos.push((Math.random() - 0.5) * 100);
+                starPos.push((Math.random() - 0.5) * 80 - 30);
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08 });
+            const stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
+
+            animate3D();
         }
-        
-        
-        function createLearningEnvironment() {
-            
-            const platformGeometry = new THREE.CircleGeometry(3, 32);
-            const platformMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x4a6fa5,
-                metalness: 0.1,
-                roughness: 0.7
-            });
-            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-            platform.rotation.x = -Math.PI / 2;
-            scene.add(platform);
-            
-           
-            const subjects = ['Math', 'Science', 'History', 'Language'];
-            const colors = [0xff6b6b, 0x4CAF50, 0xFF9800, 0x9C27B0];
-            const icons = ['fa-square-root-alt', 'fa-flask', 'fa-landmark', 'fa-language'];
-            
-            subjects.forEach((subject, index) => {
-                const angle = (index / subjects.length) * Math.PI * 2;
-                const x = Math.cos(angle) * 2.5;
-                const z = Math.sin(angle) * 2.5;
-                
-                // Create pillar
-                const pillarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 32);
-                const pillarMaterial = new THREE.MeshStandardMaterial({ 
-                    color: colors[index],
-                    metalness: 0.2,
-                    roughness: 0.5
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if (torusKnot) {
+                torusKnot.rotation.x += 0.005;
+                torusKnot.rotation.y += 0.008;
+                torusKnot.rotation.z += 0.003;
+            }
+            if (particles) {
+                particles.rotation.y += 0.0005;
+                particles.rotation.x += 0.0003;
+            }
+            if (is3DModeActive && controls) controls.update();
+            if (renderer) renderer.render(scene, camera);
+        }
+
+        // ========== BACKEND & AUTH ==========
+        const API_BASE = "https://your-backend-url.onrender.com"; // CHANGE TO YOUR ACTUAL BACKEND URL
+        let currentUser = null;
+
+        function getToken() { return localStorage.getItem('studyhub_token'); }
+        function setToken(token) { localStorage.setItem('studyhub_token', token); }
+        function removeToken() { localStorage.removeItem('studyhub_token'); localStorage.removeItem('studyhub_user'); }
+
+        async function loadCourses() {
+            const container = document.getElementById('coursesContainer');
+            try {
+                const res = await fetch(`${API_BASE}/api/courses`);
+                if (!res.ok) throw new Error();
+                const courses = await res.json();
+                if (courses.length === 0) {
+                    container.innerHTML = '<div class="text-center">No courses available.</div>';
+                    return;
+                }
+                container.innerHTML = '';
+                courses.forEach(course => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-img" style="background-image: url('${course.image || 'https://via.placeholder.com/400x200'}')">
+                            <span class="card-badge">${course.type === 'free' ? 'Free' : course.type === 'premium' ? 'Premium' : 'Upcoming'}</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>${escapeHtml(course.title)}</h3>
+                            <p>${escapeHtml(course.description)}</p>
+                            <div class="card-footer">
+                                <span><i class="far fa-clock"></i> ${course.duration || 'N/A'}</span>
+                                <button class="card-btn enroll-btn" data-id="${course._id}">Enroll</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
                 });
-                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
-                pillar.position.set(x, 0.75, z);
-                scene.add(pillar);
-                
-                // Create icon
-                const iconGeometry = new THREE.PlaneGeometry(0.6, 0.6);
-                const iconCanvas = document.createElement('canvas');
-                iconCanvas.width = 128;
-                iconCanvas.height = 128;
-                const iconContext = iconCanvas.getContext('2d');
-                iconContext.fillStyle = 'white';
-                iconContext.textAlign = 'center';
-                iconContext.textBaseline = 'middle';
-                iconContext.font = '900 70px "Font Awesome 5 Free"';
-                iconContext.fillText(String.fromCharCode(parseInt(icons[index], 16)), 64, 64);
-                
-                const iconTexture = new THREE.CanvasTexture(iconCanvas);
-                const iconMaterial = new THREE.MeshBasicMaterial({ 
-                    map: iconTexture,
-                    transparent: true,
-                    side: THREE.DoubleSide
+                document.querySelectorAll('.enroll-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (!getToken()) { alert('Please login first'); window.location.href = 'login.html'; return; }
+                        const courseId = btn.getAttribute('data-id');
+                        const res = await fetch(`${API_BASE}/api/courses/enroll`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                            body: JSON.stringify({ courseId })
+                        });
+                        if (res.ok) alert('Enrolled successfully!');
+                        else alert('Enrollment failed');
+                    });
                 });
-                const icon = new THREE.Mesh(iconGeometry, iconMaterial);
-                icon.position.set(x, 1.8, z);
-                icon.rotation.y = Math.PI / 4;
-                scene.add(icon);
-            });
-            
-           
-            const particlesGeometry = new THREE.BufferGeometry();
-            const particleCount = 1000;
-            
-            const posArray = new Float32Array(particleCount * 3);
-            for(let i = 0; i < particleCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 20;
-            }
-            
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            
-            const particlesMaterial = new THREE.PointsMaterial({
-                size: 0.05,
-                color: 0x4a6fa5,
-                transparent: true,
-                opacity: 0.8
-            });
-            
-            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-            scene.add(particlesMesh);
-        }
-        
-        // Handle window resize
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-        
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (is3DModeActive) {
-                controls.update();
-                renderer.render(scene, camera);
+            } catch (err) {
+                container.innerHTML = '<div class="text-center">Failed to load courses.</div>';
             }
         }
-        
-       
-        function showOverlay(title, content) {
-            document.getElementById('overlayTitle').textContent = title;
-            document.getElementById('overlayContent').innerHTML = content;
-            document.getElementById('contentOverlay').style.display = 'block';
-        }
-        
-        
-        function addUserAvatar(user) {
-            const avatarGeometry = new THREE.SphereGeometry(0.2, 32, 32);
-            const avatarMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xff6b6b 
-            });
-            const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
-            avatar.position.set(0, 0.2, 0);
-            scene.add(avatar);
-            
-          
-            const loader = new THREE.TextureLoader();
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 128;
-            const context = canvas.getContext('2d');
-            context.fillStyle = '#ffffff';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.font = 'Bold 20px Arial';
-            context.fillStyle = '#000000';
-            context.textAlign = 'center';
-            context.fillText(user.fullname || 'User', canvas.width/2, canvas.height/2 + 10);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const labelMaterial = new THREE.MeshBasicMaterial({ 
-                map: texture,
-                transparent: true,
-                side: THREE.DoubleSide
-            });
-            const labelGeometry = new THREE.PlaneGeometry(1, 0.5);
-            const label = new THREE.Mesh(labelGeometry, labelMaterial);
-            label.position.set(0, 0.6, 0);
-            scene.add(label);
-        }
-        
-      
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            init3DScene();
-            animate();
-            
-           
-            const currentUser = JSON.parse(localStorage.getItem('studyhub_current_user'));
-            const isLoggedIn = currentUser !== null;
-            
-            
-            if (isLoggedIn) {
-                document.getElementById('authButtons').style.display = 'none';
-                document.getElementById('profileContainer').style.display = 'block';
-                
-                // Set user data from profile
-                document.getElementById('usernameDisplay').textContent = currentUser.fullname || 'User';
-                document.getElementById('dropdownUsername').textContent = currentUser.fullname || 'User';
-                document.getElementById('dropdownUserEmail').textContent = currentUser.email || 'user@example.com';
-                
-                // Set profile picture or initial
-                const profileImage = document.getElementById('profileImage');
-                const dropdownProfileImage = document.getElementById('dropdownProfileImage');
-                
-                if (currentUser.avatarUrl) {
-                    profileImage.src = currentUser.avatarUrl;
-                    dropdownProfileImage.src = currentUser.avatarUrl;
-                } else {
-                    // Use initial if no avatar
-                    const avatarInitial = document.createElement('div');
-                    avatarInitial.textContent = (currentUser.fullname || 'U').charAt(0).toUpperCase();
-                    avatarInitial.style.display = 'flex';
-                    avatarInitial.style.alignItems = 'center';
-                    avatarInitial.style.justifyContent = 'center';
-                    avatarInitial.style.width = '100%';
-                    avatarInitial.style.height = '100%';
-                    avatarInitial.style.fontSize = '1rem';
-                    avatarInitial.style.backgroundColor = '#eee';
-                    avatarInitial.style.color = '#555';
-                    
-                    profileImage.style.display = 'none';
-                    profileImage.parentNode.appendChild(avatarInitial);
-                    
-                    dropdownProfileImage.style.display = 'none';
-                    const dropdownInitial = avatarInitial.cloneNode(true);
-                    dropdownInitial.style.fontSize = '1.5rem';
-                    dropdownProfileImage.parentNode.appendChild(dropdownInitial);
+
+        async function updateAuthUI() {
+            const token = getToken();
+            if (token) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        currentUser = await res.json();
+                        document.getElementById('authButtons').style.display = 'none';
+                        document.getElementById('profileContainer').style.display = 'block';
+                        document.getElementById('usernameDisplay').innerText = currentUser.fullname.split(' ')[0];
+                        const profileImg = document.getElementById('profileImage');
+                        profileImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.fullname)}&background=f97316&color=fff`;
+                    } else {
+                        removeToken();
+                        document.getElementById('authButtons').style.display = 'flex';
+                        document.getElementById('profileContainer').style.display = 'none';
+                    }
+                } catch(e) {
+                    removeToken();
+                    document.getElementById('authButtons').style.display = 'flex';
+                    document.getElementById('profileContainer').style.display = 'none';
                 }
-                
-                // Update notifications
-                currentUser.notifications = currentUser.notifications || 0;
-                currentUser.unreadMessages = currentUser.unreadMessages || 0;
-                
-                if (currentUser.notifications > 0) {
-                    document.getElementById('notificationBadge').style.display = 'flex';
-                    document.getElementById('notificationBadge').textContent = currentUser.notifications;
-                }
-                
-                if (currentUser.unreadMessages > 0) {
-                    document.getElementById('messageBadge').textContent = currentUser.unreadMessages;
-                    document.getElementById('messageBadge').style.display = 'flex';
-                }
-                
-                // Update CTA button
-                const ctaButton = document.getElementById('ctaSignup');
-                if (ctaButton) {
-                    ctaButton.innerHTML = currentUser.isPremium ? '<i class="fas fa-crown"></i> Premium Dashboard' : '<i class="fas fa-tachometer-alt"></i> Dashboard';
-                    ctaButton.href = currentUser.isPremium ? 'premium-dashboard.html' : 'dashboard.html';
-                }
-                
-                // Add user avatar to 3D scene
-                addUserAvatar(currentUser);
+            } else {
+                document.getElementById('authButtons').style.display = 'flex';
+                document.getElementById('profileContainer').style.display = 'none';
             }
-            
-            // Profile dropdown toggle
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Profile dropdown
+        function initProfileDropdown() {
             const profileBtn = document.getElementById('profileBtn');
-            const profileDropdown = document.getElementById('profileDropdown');
-            
+            const dropdown = document.getElementById('profileDropdown');
             if (profileBtn) {
-                profileBtn.addEventListener('click', function(e) {
+                profileBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    profileDropdown.classList.toggle('show');
+                    dropdown.classList.toggle('show');
                 });
+                document.addEventListener('click', () => dropdown.classList.remove('show'));
             }
-            
-            // Close dropdown when clicking elsewhere
-            document.addEventListener('click', function() {
-                if (profileDropdown) {
-                    profileDropdown.classList.remove('show');
-                }
-            });
-            
-            // Logout functionality
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
+                logoutBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    localStorage.removeItem('studyhub_current_user');
-                    window.location.href = 'index.html';
+                    removeToken();
+                    window.location.reload();
                 });
             }
-    
-            // Search functionality
-            const searchInput = document.querySelector('.search-bar input');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const searchTerm = searchInput.value.trim();
-                        if (searchTerm !== '') {
-                            localStorage.setItem('studyhub_search_term', searchTerm);
-                            window.location.href = `search.html?query=${encodeURIComponent(searchTerm)}`;
-                        }
-                    }
+        }
+
+        // GSAP & other animations
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('.feature-card, .card, .testimonial-card').forEach(el => {
+                gsap.from(el, {
+                    scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
+                    y: 60,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: 'power2.out'
                 });
-            }
-    
-            // Scroll animations
-            const animateOnScroll = function() {
-                const elements = document.querySelectorAll('.fade-in');
-                elements.forEach(element => {
-                    const elementPosition = element.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-                    
-                    if (elementPosition < windowHeight - 100) {
-                        element.style.opacity = '1';
-                        element.style.transform = 'translateY(0)';
-                    }
-                });
-            };
-    
-            // Initialize animations
-            window.addEventListener('load', function() {
-                document.querySelectorAll('.fade-in').forEach(el => {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateY(20px)';
-                    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                });
-                
-                animateOnScroll();
             });
-            
-            window.addEventListener('scroll', animateOnScroll);
-            
-            // Simulate notification update
-            if (isLoggedIn) {
-                setTimeout(() => {
-                    const notificationBadge = document.getElementById('notificationBadge');
-                    if (notificationBadge) {
-                        currentUser.notifications = (currentUser.notifications || 0) + 1;
-                        localStorage.setItem('studyhub_current_user', JSON.stringify(currentUser));
-                        
-                        notificationBadge.textContent = currentUser.notifications;
-                        notificationBadge.style.display = 'flex';
-                        
-                        notificationBadge.style.animation = 'none';
-                        void notificationBadge.offsetWidth;
-                        notificationBadge.style.animation = 'pulse 0.5s 2';
-                    }
-                }, 5000);
-            }
-            
+            gsap.utils.toArray('.feature-icon').forEach(icon => {
+                gsap.to(icon, { y: -8, duration: 2.2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+            });
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    const rotateX = y * 10;
+                    const rotateY = x * 10;
+                    card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            init3D();
+            await updateAuthUI();
+            initProfileDropdown();
+            await loadCourses();
+            initAnimations();
+
             // 3D Navigation Buttons
-            document.getElementById('toggle3dBtn').addEventListener('click', function() {
+            const toggleBtn = document.getElementById('toggle3dBtn');
+            const container = document.getElementById('threejs-container');
+            toggleBtn.addEventListener('click', () => {
                 is3DModeActive = !is3DModeActive;
-                const container = document.getElementById('threejs-container');
-                
-                if (is3DModeActive) {
-                    container.classList.add('active');
-                    this.innerHTML = '<i class="fas fa-times"></i>';
-                    camera.position.set(0, 3, 5);
+                container.style.opacity = is3DModeActive ? '0.9' : '0.3';
+                if (controls) controls.enabled = is3DModeActive;
+            });
+            document.getElementById('home3dBtn').addEventListener('click', () => {
+                if (is3DModeActive && camera && controls) {
+                    camera.position.set(0, 2, 8);
                     controls.target.set(0, 0, 0);
-                } else {
-                    container.classList.remove('active');
-                    this.innerHTML = '<i class="fas fa-cube"></i>';
-                }
+                    controls.update();
+                } else window.scrollTo({ top: 0, behavior: 'smooth' });
             });
-            
-            document.getElementById('home3dBtn').addEventListener('click', function() {
-                if (!is3DModeActive) return;
-                
-                gsap.to(camera.position, { 
-                    x: 0, 
-                    y: 3, 
-                    z: 5, 
-                    duration: 1 
-                });
-                gsap.to(controls.target, { 
-                    x: 0, 
-                    y: 0, 
-                    z: 0, 
-                    duration: 1 
-                });
-            });
-            
-            document.getElementById('courses3dBtn').addEventListener('click', function() {
-                if (!is3DModeActive) return;
-                
-                showOverlay('Courses', `
-                    <div class="cards-grid">
-                        <div class="card">
-                            <div class="card-img" style="background-image: linear-gradient(to right, #4a6fa5, #6a8fc7); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                                <i class="fas fa-square-root-alt"></i>
-                            </div>
-                            <div class="card-content">
-                                <h3>Mathematics</h3>
-                                <p>Explore our math courses in 3D space with interactive visualizations and problem-solving tools.</p>
-                                <button class="btn btn-primary mt-2" onclick="navigateToMath()"><i class="fas fa-arrow-right"></i> Enter Math Zone</button>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-img" style="background-image: linear-gradient(to right, #4CAF50, #8BC34A); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <div class="card-content">
-                                <h3>Science</h3>
-                                <p>Discover interactive science modules with 3D models of molecules, cells, and physics concepts.</p>
-                                <button class="btn btn-primary mt-2" onclick="navigateToScience()"><i class="fas fa-arrow-right"></i> Enter Science Lab</button>
-                            </div>
-                        </div>
-                    </div>
-                `);
-            });
-            
-            document.getElementById('community3dBtn').addEventListener('click', function() {
-                if (!is3DModeActive) return;
-                
-                showOverlay('Virtual Campus', `
-                    <div style="text-align: center;">
-                        <div style="width: 100%; height: 200px; background-color: #f0f4f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-                            <i class="fas fa-users" style="font-size: 3rem; color: #4a6fa5;"></i>
-                        </div>
-                        <h3 style="margin-bottom: 1rem;">Join Our Virtual Campus</h3>
-                        <p style="margin-bottom: 1.5rem; color: var(--text-light);">Connect with other learners in our immersive 3D virtual campus. Attend virtual study sessions, join discussion groups, and collaborate with peers from around the world.</p>
-                        <button class="btn btn-primary" onclick="enterVirtualCampus()" style="padding: 0.8rem 1.8rem;"><i class="fas fa-door-open"></i> Enter Virtual Campus</button>
-                    </div>
-                `);
-            });
-            
-            document.getElementById('profile3dBtn').addEventListener('click', function() {
-                if (!is3DModeActive) return;
-                
-                showOverlay('Your Profile', `
-                    <div style="text-align: center;">
-                        <div style="width: 120px; height: 120px; background-color: #eee; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #555;">
-                            ${(document.getElementById('usernameDisplay').textContent || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        <h3 style="margin-bottom: 0.5rem;">${document.getElementById('usernameDisplay').textContent || 'User'}</h3>
-                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">${document.getElementById('userRole').textContent || 'Member'}</p>
-                        
-                        <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
-                            <div style="background-color: #f0f4f8; padding: 1rem; border-radius: 8px; min-width: 100px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">12</div>
-                                <div style="font-size: 0.8rem; color: var(--text-light);">Courses</div>
-                            </div>
-                            <div style="background-color: #f0f4f8; padding: 1rem; border-radius: 8px; min-width: 100px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">24</div>
-                                <div style="font-size: 0.8rem; color: var(--text-light);">Notes</div>
-                            </div>
-                            <div style="background-color: #f0f4f8; padding: 1rem; border-radius: 8px; min-width: 100px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">5</div>
-                                <div style="font-size: 0.8rem; color: var(--text-light);">Friends</div>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-outline" onclick="customizeAvatar()" style="border-color: var(--primary); color: var(--primary); margin-right: 0.5rem;"><i class="fas fa-user-edit"></i> Customize Avatar</button>
-                        <button class="btn btn-primary"><i class="fas fa-cog"></i> Settings</button>
-                    </div>
-                `);
-            });
-            
-            // Close overlay button
-            document.getElementById('closeOverlay').addEventListener('click', function() {
-                document.getElementById('contentOverlay').style.display = 'none';
-            });
-            
-            // Example navigation functions (would be expanded in full implementation)
-            window.navigateToMath = function() {
-                alert('Entering Math Zone - this would load interactive 3D math visualizations in a full implementation');
-                document.getElementById('contentOverlay').style.display = 'none';
-                
-                // In a full implementation, we would transition to the math environment
-                if (is3DModeActive) {
-                    // Create math-specific 3D environment
-                    scene.children = []; // Clear existing scene
-                    
-                    // Add math-specific objects
-                    const geometry = new THREE.BoxGeometry(1, 1, 1);
-                    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                    const cube = new THREE.Mesh(geometry, material);
-                    scene.add(cube);
-                    
-                    camera.position.z = 5;
-                    controls.target.set(0, 0, 0);
-                }
-            };
-            
-            window.navigateToScience = function() {
-                alert('Entering Science Lab - this would load interactive 3D science visualizations in a full implementation');
-                document.getElementById('contentOverlay').style.display = 'none';
-            };
-            
-            window.enterVirtualCampus = function() {
-                alert('Entering Virtual Campus - this would load a 3D virtual environment with other users in a full implementation');
-                document.getElementById('contentOverlay').style.display = 'none';
-            };
-            
-            window.customizeAvatar = function() {
-                alert('Avatar customization would appear here in a full implementation');
-            };
+            document.getElementById('courses3dBtn').addEventListener('click', () => window.location.href = 'courses.html');
+            document.getElementById('community3dBtn').addEventListener('click', () => window.location.href = 'community.html');
+            document.getElementById('profile3dBtn').addEventListener('click', () => window.location.href = 'profile.html');
         });
     </script>
 </body>
