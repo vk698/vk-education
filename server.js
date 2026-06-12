@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGO_URI || "mongodb+srv://vishalkumar2257r_db_use
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// ==================== MODELS (unchanged) ====================
+// ==================== MODELS ====================
 const UserSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -62,8 +62,9 @@ const CommunityPostSchema = new mongoose.Schema({
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   comments: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    userName: String,
     text: String,
-    createdAt: Date
+    createdAt: { type: Date, default: Date.now }
   }],
   createdAt: { type: Date, default: Date.now }
 });
@@ -187,7 +188,7 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
-// ========== FORGOT PASSWORD – BREVO HTTP API (NO SMTP, NO TIMEOUT) ==========
+// ========== FORGOT PASSWORD – BREVO HTTP API ==========
 function sendBrevoEmail(apiKey, toEmail, subject, htmlContent, fromEmail) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
@@ -281,7 +282,7 @@ app.post("/api/auth/reset-password", async (req, res) => {
   }
 });
 
-// ==================== OTHER API ROUTES ====================
+// ==================== COMMUNITY & COURSE ROUTES ====================
 app.get("/api/courses", async (req, res) => {
   try {
     const courses = await Course.find().sort({ createdAt: -1 });
@@ -291,6 +292,7 @@ app.get("/api/courses", async (req, res) => {
   }
 });
 
+// ----- POSTS -----
 app.get("/api/posts", async (req, res) => {
   try {
     const posts = await CommunityPost.find().sort({ createdAt: -1 }).populate("userId", "fullname");
@@ -312,6 +314,50 @@ app.post("/api/posts", authenticateToken, async (req, res) => {
   }
 });
 
+app.post("/api/posts/:postId/like", authenticateToken, async (req, res) => {
+  try {
+    const post = await CommunityPost.findById(req.params.postId);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    const userId = req.user.userId;
+    const likedIndex = post.likes.indexOf(userId);
+    if (likedIndex === -1) {
+      post.likes.push(userId);
+    } else {
+      post.likes.splice(likedIndex, 1);
+    }
+    await post.save();
+    res.json({ likes: post.likes.length, liked: likedIndex === -1 });
+  } catch (error) {
+    console.error("Like error:", error);
+    res.status(500).json({ error: "Failed to toggle like" });
+  }
+});
+
+app.post("/api/posts/:postId/comment", authenticateToken, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "Comment text is required" });
+    }
+    const post = await CommunityPost.findById(req.params.postId);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    const user = await User.findById(req.user.userId).select("fullname");
+    const newComment = {
+      userId: req.user.userId,
+      userName: user.fullname,
+      text: text.trim(),
+      createdAt: new Date()
+    };
+    post.comments.push(newComment);
+    await post.save();
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Comment error:", error);
+    res.status(500).json({ error: "Failed to add comment" });
+  }
+});
+
+// ----- GROUPS -----
 app.get("/api/groups", async (req, res) => {
   try {
     const groups = await Group.find().sort({ createdAt: -1 });
@@ -321,6 +367,30 @@ app.get("/api/groups", async (req, res) => {
   }
 });
 
+app.post("/api/groups", authenticateToken, async (req, res) => {
+  try {
+    const { name, subject, description, image } = req.body;
+    if (!name || !subject) {
+      return res.status(400).json({ error: "Name and subject are required" });
+    }
+    const newGroup = new Group({
+      name,
+      subject,
+      description: description || "",
+      image: image || "https://via.placeholder.com/48",
+      members: [req.user.userId],
+      createdBy: req.user.userId,
+      createdAt: new Date()
+    });
+    await newGroup.save();
+    res.status(201).json(newGroup);
+  } catch (error) {
+    console.error("Group creation error:", error);
+    res.status(500).json({ error: "Failed to create group" });
+  }
+});
+
+// ----- EVENTS -----
 app.get("/api/events", async (req, res) => {
   try {
     const events = await Event.find().sort({ date: 1 });
@@ -330,6 +400,23 @@ app.get("/api/events", async (req, res) => {
   }
 });
 
+app.post("/api/events/:eventId/join", authenticateToken, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ error: "Event not found" });
+    const userId = req.user.userId;
+    if (!event.joinedBy.includes(userId)) {
+      event.joinedBy.push(userId);
+      await event.save();
+    }
+    res.json({ message: "Joined event", joined: true });
+  } catch (error) {
+    console.error("Join event error:", error);
+    res.status(500).json({ error: "Failed to join event" });
+  }
+});
+
+// ----- HEALTH -----
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
