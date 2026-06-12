@@ -1,602 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>My Profile - StudyHub</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-        }
-
-        :root {
-            --accent: #f97316;
-            --accent-light: #ff9f4a;
-            --text-light: #f8fafc;
-            --text-dim: #cbd5e1;
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            background: #0a0f1c;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* 3D background container */
-        #threejs-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        /* Header */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(16px);
-            background: rgba(10, 15, 28, 0.7);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 0.8rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-size: 1.8rem;
-            font-weight: 800;
-        }
-        .logo i { color: var(--accent); font-size: 2rem; }
-        .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
-
-        nav {
-            display: flex;
-            gap: 1.2rem;
-        }
-        nav a {
-            color: var(--text-dim);
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.2s;
-            position: relative;
-        }
-        nav a:hover { color: var(--accent); }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
-            padding: 0.4rem 1rem;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .logout-btn:hover {
-            background: rgba(249,115,22,0.2);
-            color: var(--accent);
-        }
-
-        /* Profile Container */
-        .profile-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .glass-card {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            animation: fadeUp 0.6s ease-out;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #2d2d44;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 3px solid var(--accent);
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar span { font-size: 3rem; font-weight: bold; color: var(--accent); }
-
-        .profile-info h2 { font-size: 1.8rem; margin-bottom: 0.3rem; }
-        .profile-info p { color: var(--text-dim); margin-bottom: 0.2rem; }
-
-        .stats {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-        .stat {
-            background: rgba(0,0,0,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            text-align: center;
-        }
-        .stat .number { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
-        .stat .label { font-size: 0.8rem; color: var(--text-dim); }
-
-        .edit-btn {
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .edit-btn:hover {
-            background: var(--accent);
-            color: white;
-        }
-
-        .detail-group {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--glass-border);
-        }
-        .detail-group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-        .detail-group h3 { font-size: 1.2rem; }
-        .detail-content p { color: var(--text-dim); }
-
-        .edit-form {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(0,0,0,0.3);
-            border-radius: 24px;
-        }
-        .edit-form input, .edit-form textarea, .edit-form select {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
-            color: white;
-            margin-bottom: 1rem;
-        }
-        .edit-form textarea { border-radius: 20px; resize: vertical; }
-        .edit-form button { margin-right: 0.5rem; }
-
-        .badges {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-        .badge {
-            background: rgba(249,115,22,0.2);
-            border: 1px solid var(--accent);
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-            font-size: 0.8rem;
-        }
-
-        .progress-container {
-            margin-top: 1rem;
-        }
-        .progress-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.5s;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #2ecc71;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            z-index: 2000;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        .toast.error { background: #e74c3c; }
-        .toast.show { opacity: 1; transform: translateY(0); }
-
-        @media (max-width: 768px) {
-            .profile-header { flex-direction: column; text-align: center; }
-            .stats { justify-content: center; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>My Profile - StudyHub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    :root {
+      --accent: #f97316;
+      --accent-light: #ff9f4a;
+      --text-light: #f8fafc;
+      --text-dim: #cbd5e1;
+      --glass-border: rgba(255,255,255,0.1);
+    }
+    body {
+      background: #0a0f1c;
+      color: var(--text-light);
+      min-height: 100vh;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(16px);
+      background: rgba(10,15,28,0.7);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1.8rem; font-weight: 800; }
+    .logo i { color: var(--accent); font-size: 2rem; }
+    .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    nav { display: flex; gap: 1.2rem; }
+    nav a { color: var(--text-dim); text-decoration: none; font-weight: 500; }
+    nav a:hover { color: var(--accent); }
+    .profile-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(15,23,42,0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 32px;
+    }
+    .avatar {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .avatar img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      color: white;
+      font-family: inherit;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: 0.2s;
+    }
+    button:hover { background: var(--accent-light); transform: translateY(-2px); }
+    .btn-secondary { background: #95a5a6; }
+    .logout { margin-top: 2rem; text-align: center; }
+    .blogs-section {
+      margin-top: 2rem;
+      border-top: 1px solid var(--glass-border);
+      padding-top: 1.5rem;
+    }
+    .blog-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .blog-info h4 { color: var(--accent); margin-bottom: 5px; }
+    .delete-blog { background: #e74c3c; padding: 5px 12px; border-radius: 20px; }
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; background: #2ecc71; padding: 12px 20px;
+      border-radius: 40px; z-index: 2000; opacity: 0; transform: translateY(20px);
+      transition: 0.3s; pointer-events: none;
+    }
+    .toast.error { background: #e74c3c; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
 </head>
 <body>
-    <div id="threejs-bg"></div>
-    
-    <header>
-        <div class="logo"><i class="fas fa-graduation-cap"></i> <span>StudyHub</span></div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="courses.html">Courses</a>
-            <a href="notes.html">Notes</a>
-            <a href="community.html">Community</a>
-            <a href="exams.html">Exams</a>
-        </nav>
-        <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </header>
+  <header>
+    <div class="logo"><i class="fas fa-graduation-cap"></i> <span>StudyHub</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="courses.html">Courses</a>
+      <a href="notes.html">Notes</a>
+      <a href="community.html">Community</a>
+      <a href="exams.html">Exams</a>
+    </nav>
+    <button id="logoutBtn" style="background:transparent; border:1px solid var(--accent);">Logout</button>
+  </header>
 
-    <div class="profile-container">
-        <div class="glass-card">
-            <div class="profile-header">
-                <div class="avatar" id="avatarContainer">
-                    <img id="avatarImg" src="" alt="Profile">
-                    <span id="avatarInitial"></span>
-                </div>
-                <div class="profile-info">
-                    <h2 id="fullname">Loading...</h2>
-                    <p id="email"></p>
-                    <p id="grade"></p>
-                    <div class="stats">
-                        <div class="stat"><div class="number" id="coursesCount">0</div><div class="label">Courses</div></div>
-                        <div class="stat"><div class="number" id="postsCount">0</div><div class="label">Posts</div></div>
-                        <div class="stat"><div class="number" id="notesCount">0</div><div class="label">Notes</div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="progress-container">
-                <div class="progress-text">Profile completion: <span id="completionPercent">0</span>%</div>
-                <div class="progress-bar"><div class="progress-fill" id="completionFill"></div></div>
-            </div>
-            <div class="badges" id="badgesContainer"></div>
-        </div>
+  <div class="profile-container">
+    <div style="display: flex; justify-content: flex-end;">
+      <button id="closeProfileBtn" style="background:#7f8c8d;"><i class="fas fa-times"></i> Close</button>
+    </div>
+    <h2 style="color:var(--accent);">My Profile</h2>
+    <div class="avatar">
+      <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
+    </div>
+    <form id="profileForm">
+      <div class="form-group">
+        <label>Profile Picture</label>
+        <input type="file" id="profilePicture" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" disabled style="background:#2d2d44;">
+      </div>
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea id="bio" rows="4"></textarea>
+      </div>
+      <button type="submit">Update Profile</button>
+    </form>
 
-        <!-- About -->
-        <div class="glass-card">
-            <div class="detail-group-header"><h3>About Me</h3><button class="edit-btn" onclick="toggleEdit('about')">Edit</button></div>
-            <div class="detail-content"><p id="aboutText"></p></div>
-            <div class="edit-form" id="aboutForm">
-                <textarea id="aboutInput" rows="3" placeholder="Tell us about yourself..."></textarea>
-                <button class="edit-btn" onclick="saveField('about')">Save</button>
-                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('about')">Cancel</button>
-            </div>
-        </div>
-
-        <!-- Subjects -->
-        <div class="glass-card">
-            <div class="detail-group-header"><h3>Subjects of Interest</h3><button class="edit-btn" onclick="toggleEdit('subjects')">Edit</button></div>
-            <div class="detail-content"><p id="subjectsText"></p></div>
-            <div class="edit-form" id="subjectsForm">
-                <input type="text" id="subjectsInput" placeholder="e.g., Math, Physics, Programming">
-                <button class="edit-btn" onclick="saveField('subjects')">Save</button>
-                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('subjects')">Cancel</button>
-            </div>
-        </div>
-
-        <!-- Education -->
-        <div class="glass-card">
-            <div class="detail-group-header"><h3>Education</h3><button class="edit-btn" onclick="toggleEdit('education')">Edit</button></div>
-            <div class="detail-content"><p id="schoolText"></p><p id="gpaText"></p></div>
-            <div class="edit-form" id="educationForm">
-                <input type="text" id="schoolInput" placeholder="School/University">
-                <input type="text" id="yearsInput" placeholder="Years attended">
-                <input type="text" id="gpaInput" placeholder="GPA">
-                <button class="edit-btn" onclick="saveField('education')">Save</button>
-                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('education')">Cancel</button>
-            </div>
-        </div>
-
-        <!-- Social Links -->
-        <div class="glass-card">
-            <div class="detail-group-header"><h3>Social Links</h3><button class="edit-btn" onclick="toggleEdit('social')">Edit</button></div>
-            <div class="detail-content" id="socialLinksDisplay"></div>
-            <div class="edit-form" id="socialForm">
-                <input type="text" id="githubInput" placeholder="GitHub URL">
-                <input type="text" id="linkedinInput" placeholder="LinkedIn URL">
-                <input type="text" id="twitterInput" placeholder="Twitter URL">
-                <button class="edit-btn" onclick="saveField('social')">Save</button>
-                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('social')">Cancel</button>
-            </div>
-        </div>
-
-        <!-- Account Settings (Avatar, Name, Grade) -->
-        <div class="glass-card">
-            <div class="detail-group-header"><h3>Account Settings</h3><button class="edit-btn" onclick="toggleEdit('account')">Edit</button></div>
-            <div class="detail-content">
-                <p><strong>Avatar:</strong> <span id="avatarStatus">Current image</span></p>
-                <p><strong>Name:</strong> <span id="nameDisplay"></span></p>
-                <p><strong>Grade:</strong> <span id="gradeDisplay"></span></p>
-            </div>
-            <div class="edit-form" id="accountForm">
-                <div><label>Upload new avatar</label><input type="file" id="avatarUpload" accept="image/*"></div>
-                <div><label>Full Name</label><input type="text" id="nameInput" placeholder="Full name"></div>
-                <div><label>Grade Level</label><select id="gradeSelect"><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option><option value="college">College</option></select></div>
-                <button class="edit-btn" onclick="saveField('account')">Save</button>
-                <button class="edit-btn" style="border-color: #666;" onclick="toggleEdit('account')">Cancel</button>
-            </div>
-        </div>
+    <div class="blogs-section">
+      <h3><i class="fas fa-pen-nib"></i> My Blogs</h3>
+      <div id="myBlogsList">Loading...</div>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div class="logout">
+      <button id="logoutBtn2" class="btn-secondary">Logout</button>
+    </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // ========== 3D BACKGROUND ==========
-        (function init3DBackground() {
-            const container = document.getElementById('threejs-bg');
-            if (!container) return;
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0f1c);
-            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 8);
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-            const ambient = new THREE.AmbientLight(0x404060);
-            scene.add(ambient);
-            const pointLight = new THREE.PointLight(0xf97316, 0.8);
-            pointLight.position.set(2, 3, 4);
-            scene.add(pointLight);
-            const fillLight = new THREE.PointLight(0x4c1d95, 0.5);
-            fillLight.position.set(-2, 1, -3);
-            scene.add(fillLight);
-            const geometry = new THREE.TorusKnotGeometry(1.2, 0.3, 200, 32);
-            const material = new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0x4c1d95, roughness: 0.4, metalness: 0.6 });
-            const knot = new THREE.Mesh(geometry, material);
-            scene.add(knot);
-            const particleCount = 1500;
-            const positions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount; i++) {
-                positions[i*3] = (Math.random() - 0.5) * 30;
-                positions[i*3+1] = (Math.random() - 0.5) * 20;
-                positions[i*3+2] = (Math.random() - 0.5) * 20 - 10;
-            }
-            const particleGeo = new THREE.BufferGeometry();
-            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const particleMat = new THREE.PointsMaterial({ color: 0xfacc15, size: 0.07, transparent: true, opacity: 0.6 });
-            const particles = new THREE.Points(particleGeo, particleMat);
-            scene.add(particles);
-            const starGeo = new THREE.BufferGeometry();
-            const starPos = [];
-            for (let i = 0; i < 2000; i++) {
-                starPos.push((Math.random() - 0.5) * 200);
-                starPos.push((Math.random() - 0.5) * 100);
-                starPos.push((Math.random() - 0.5) * 60 - 20);
-            }
-            starGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
-            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
-            const stars = new THREE.Points(starGeo, starMat);
-            scene.add(stars);
-            function animate() {
-                requestAnimationFrame(animate);
-                knot.rotation.x += 0.005;
-                knot.rotation.y += 0.008;
-                knot.rotation.z += 0.003;
-                particles.rotation.y += 0.0005;
-                stars.rotation.x += 0.0002;
-                renderer.render(scene, camera);
-            }
-            animate();
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        })();
+  <div id="toast" class="toast"></div>
 
-        // ========== BACKEND INTEGRATION ==========
-        const API_BASE = "https://studyhub-backend-f15o.onrender.com";
-        let currentUser = null;
+  <script>
+    const API_BASE = "https://studyhub-backend-f15o.onrender.com"; // CHANGE to your backend URL
+    const token = localStorage.getItem('studyhub_token');
+    if (!token) window.location.href = 'login.html';
 
-        function getToken() { return localStorage.getItem('studyhub_token'); }
-        function getAuthHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
+    let currentUser = null;
+    const toast = document.getElementById('toast');
 
-        async function fetchProfile() {
-            const token = getToken();
-            if (!token) { window.location.href = 'login.html'; return; }
-            try {
-                const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) throw new Error();
-                currentUser = await res.json();
-                renderProfile();
-            } catch (e) {
-                localStorage.removeItem('studyhub_token');
-                window.location.href = 'login.html';
-            }
-        }
+    function showToast(msg, isErr = false) {
+      toast.textContent = msg;
+      toast.className = isErr ? 'toast error show' : 'toast show';
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
-        function renderProfile() {
-            if (!currentUser) return;
-            // Basic info
-            document.getElementById('fullname').innerText = currentUser.fullname || 'User';
-            document.getElementById('email').innerText = currentUser.email;
-            document.getElementById('grade').innerText = currentUser.grade ? `Grade ${currentUser.grade}` : '';
-            document.getElementById('nameDisplay').innerText = currentUser.fullname;
-            document.getElementById('gradeDisplay').innerText = currentUser.grade || 'Not set';
-            // Avatar
-            const avatarImg = document.getElementById('avatarImg');
-            const avatarInitial = document.getElementById('avatarInitial');
-            if (currentUser.avatarUrl) {
-                avatarImg.src = currentUser.avatarUrl;
-                avatarImg.style.display = 'block';
-                avatarInitial.style.display = 'none';
-            } else {
-                avatarImg.style.display = 'none';
-                avatarInitial.style.display = 'flex';
-                avatarInitial.innerText = currentUser.fullname ? currentUser.fullname.charAt(0).toUpperCase() : 'U';
-            }
-            // About, subjects, education
-            document.getElementById('aboutText').innerText = currentUser.about || 'No information provided.';
-            document.getElementById('subjectsText').innerText = Array.isArray(currentUser.subjects) ? currentUser.subjects.join(', ') : (currentUser.subjects || '');
-            document.getElementById('schoolText').innerHTML = currentUser.school ? `${currentUser.school} ${currentUser.years ? '('+currentUser.years+')' : ''}` : 'Not specified';
-            document.getElementById('gpaText').innerHTML = currentUser.gpa ? `GPA: ${currentUser.gpa}/4.0` : '';
-            // Social links
-            const socialDiv = document.getElementById('socialLinksDisplay');
-            socialDiv.innerHTML = '';
-            if (currentUser.social) {
-                if (currentUser.social.github) socialDiv.innerHTML += `<a href="${currentUser.social.github}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-github"></i> GitHub</a>`;
-                if (currentUser.social.linkedin) socialDiv.innerHTML += `<a href="${currentUser.social.linkedin}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-linkedin"></i> LinkedIn</a>`;
-                if (currentUser.social.twitter) socialDiv.innerHTML += `<a href="${currentUser.social.twitter}" target="_blank" style="color:var(--accent);"><i class="fab fa-twitter"></i> Twitter</a>`;
-                if (!currentUser.social.github && !currentUser.social.linkedin && !currentUser.social.twitter) socialDiv.innerHTML = '<p class="text-dim">No social links added</p>';
-            } else {
-                socialDiv.innerHTML = '<p class="text-dim">No social links added</p>';
-            }
-            // Stats (temporary values – can be extended)
-            document.getElementById('coursesCount').innerText = currentUser.enrolledCourses?.length || 0;
-            document.getElementById('postsCount').innerText = currentUser.postsCount || 0;
-            document.getElementById('notesCount').innerText = currentUser.notesCount || 0;
-            // Badges
-            const badgesContainer = document.getElementById('badgesContainer');
-            badgesContainer.innerHTML = '';
-            if (currentUser.badges && currentUser.badges.length) {
-                currentUser.badges.forEach(b => { const span = document.createElement('span'); span.className = 'badge'; span.innerText = b; badgesContainer.appendChild(span); });
-            } else {
-                badgesContainer.innerHTML = '<span class="badge">New Member</span>';
-            }
-            // Completion
-            let completion = 0;
-            if (currentUser.fullname) completion++;
-            if (currentUser.about) completion++;
-            if (currentUser.subjects && currentUser.subjects.length) completion++;
-            if (currentUser.school) completion++;
-            if (currentUser.gpa) completion++;
-            if (currentUser.avatarUrl) completion++;
-            if (currentUser.social && (currentUser.social.github || currentUser.social.linkedin || currentUser.social.twitter)) completion++;
-            const percent = Math.round((completion / 7) * 100);
-            document.getElementById('completionPercent').innerText = percent;
-            document.getElementById('completionFill').style.width = `${percent}%`;
-            // Fill edit forms
-            document.getElementById('aboutInput').value = currentUser.about || '';
-            document.getElementById('subjectsInput').value = Array.isArray(currentUser.subjects) ? currentUser.subjects.join(', ') : (currentUser.subjects || '');
-            document.getElementById('schoolInput').value = currentUser.school || '';
-            document.getElementById('yearsInput').value = currentUser.years || '';
-            document.getElementById('gpaInput').value = currentUser.gpa || '';
-            document.getElementById('githubInput').value = currentUser.social?.github || '';
-            document.getElementById('linkedinInput').value = currentUser.social?.linkedin || '';
-            document.getElementById('twitterInput').value = currentUser.social?.twitter || '';
-            document.getElementById('nameInput').value = currentUser.fullname || '';
-            document.getElementById('gradeSelect').value = currentUser.grade || '12';
-        }
-
-        async function saveField(field) {
-            let updateData = {};
-            if (field === 'about') {
-                updateData.about = document.getElementById('aboutInput').value;
-            } else if (field === 'subjects') {
-                const val = document.getElementById('subjectsInput').value;
-                updateData.subjects = val.split(',').map(s => s.trim()).filter(s => s);
-            } else if (field === 'education') {
-                updateData.school = document.getElementById('schoolInput').value;
-                updateData.years = document.getElementById('yearsInput').value;
-                updateData.gpa = document.getElementById('gpaInput').value;
-            } else if (field === 'social') {
-                updateData.social = {
-                    github: document.getElementById('githubInput').value,
-                    linkedin: document.getElementById('linkedinInput').value,
-                    twitter: document.getElementById('twitterInput').value
-                };
-            } else if (field === 'account') {
-                updateData.fullname = document.getElementById('nameInput').value;
-                updateData.grade = document.getElementById('gradeSelect').value;
-                const fileInput = document.getElementById('avatarUpload');
-                if (fileInput.files && fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    if (file.size > 2*1024*1024) { showToast('File too large', true); return; }
-                    const reader = new FileReader();
-                    reader.onload = async function(e) {
-                        updateData.avatarUrl = e.target.result;
-                        await performUpdate(updateData);
-                    };
-                    reader.readAsDataURL(file);
-                    return; // async
-                }
-            }
-            await performUpdate(updateData);
-            toggleEdit(field);
-        }
-
-        async function performUpdate(data) {
-            try {
-                const res = await fetch(`${API_BASE}/api/auth/update`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(data)
-                });
-                if (res.ok) {
-                    const updated = await res.json();
-                    currentUser = updated;
-                    localStorage.setItem('studyhub_user', JSON.stringify(updated));
-                    renderProfile();
-                    showToast('Profile updated!');
-                } else {
-                    showToast('Update failed', true);
-                }
-            } catch(e) { showToast('Server error', true); }
-        }
-
-        function toggleEdit(section) {
-            const form = document.getElementById(`${section}Form`);
-            if (form) form.style.display = form.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function showToast(msg, isErr = false) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = isErr ? 'toast error show' : 'toast show';
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('studyhub_token');
-            localStorage.removeItem('studyhub_user');
-            window.location.href = 'index.html';
+    async function loadProfile() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
+        const user = await res.json();
+        if (res.ok) {
+          currentUser = user;
+          document.getElementById('name').value = user.fullname;
+          document.getElementById('email').value = user.email;
+          document.getElementById('bio').value = user.about || '';
+          if (user.avatarUrl) document.getElementById('profileImg').src = user.avatarUrl;
+          loadMyBlogs(user._id);
+        } else {
+          showToast('Session expired. Please login again.', true);
+          localStorage.clear();
+          setTimeout(() => window.location.href = 'login.html', 2000);
+        }
+      } catch (err) { console.error(err); }
+    }
 
-        fetchProfile();
-    </script>
+    async function loadMyBlogs(userId) {
+      const container = document.getElementById('myBlogsList');
+      try {
+        const res = await fetch(`${API_BASE}/api/blog/user/${userId}`);
+        const blogs = await res.json();
+        if (blogs.length === 0) {
+          container.innerHTML = '<p>No blogs yet. <a href="create-blog.html">Create your first blog</a>.</p>';
+          return;
+        }
+        container.innerHTML = '';
+        blogs.forEach(blog => {
+          const div = document.createElement('div');
+          div.className = 'blog-item';
+          div.innerHTML = `
+            <div class="blog-info">
+              <h4>${escapeHtml(blog.title)}</h4>
+              <p>${escapeHtml(blog.content.substring(0, 100))}...</p>
+              <small>${new Date(blog.createdAt).toLocaleDateString()}</small>
+            </div>
+            <button class="delete-blog" data-id="${blog._id}"><i class="fas fa-trash"></i> Delete</button>
+          `;
+          container.appendChild(div);
+        });
+        document.querySelectorAll('.delete-blog').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Delete this blog?')) {
+              await deleteBlog(btn.getAttribute('data-id'));
+              loadMyBlogs(userId);
+            }
+          });
+        });
+      } catch (err) {
+        container.innerHTML = '<p>Error loading blogs.</p>';
+      }
+    }
+
+    async function deleteBlog(blogId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/blog/${blogId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) alert('Delete failed');
+      } catch (err) { alert('Error deleting'); }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fullname = document.getElementById('name').value;
+      const about = document.getElementById('bio').value;
+      const fileInput = document.getElementById('profilePicture');
+      const formData = new FormData();
+      formData.append('fullname', fullname);
+      formData.append('about', about);
+      if (fileInput.files[0]) formData.append('avatarUrl', fileInput.files[0]);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/update`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        const updatedUser = await res.json();
+        if (res.ok) {
+          localStorage.setItem('studyhub_user', JSON.stringify(updatedUser));
+          if (updatedUser.avatarUrl) document.getElementById('profileImg').src = updatedUser.avatarUrl;
+          showToast('Profile updated!');
+        } else showToast(updatedUser.error || 'Update failed', true);
+      } catch (err) { showToast('Error updating profile', true); }
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('logoutBtn').onclick = logout;
+    document.getElementById('logoutBtn2').onclick = logout;
+    document.getElementById('closeProfileBtn').onclick = () => window.location.href = 'index.html';
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    loadProfile();
+  </script>
 </body>
 </html>
