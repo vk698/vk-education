@@ -572,31 +572,58 @@
             }
         }
 
+        // ✅ FIXED: Profile picture update with fallback and error handling
         async function updateAuthUI() {
             const token = getToken();
+            const authButtons = document.getElementById('authButtons');
+            const profileContainer = document.getElementById('profileContainer');
+            const profileImage = document.getElementById('profileImage');
+            const usernameDisplay = document.getElementById('usernameDisplay');
+
             if (token) {
                 try {
-                    const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const res = await fetch(`${API_BASE}/api/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
                     if (res.ok) {
                         currentUser = await res.json();
-                        document.getElementById('authButtons').style.display = 'none';
-                        document.getElementById('profileContainer').style.display = 'block';
-                        document.getElementById('usernameDisplay').innerText = currentUser.fullname.split(' ')[0];
-                        const profileImg = document.getElementById('profileImage');
-                        profileImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.fullname)}&background=f97316&color=fff`;
+                        // Show profile section
+                        if (authButtons) authButtons.style.display = 'none';
+                        if (profileContainer) profileContainer.style.display = 'block';
+                        // Set username (first name)
+                        if (usernameDisplay) {
+                            const name = currentUser.fullname || 'User';
+                            usernameDisplay.innerText = name.split(' ')[0];
+                        }
+                        // Set profile image: prefer avatarUrl from backend, else use UI Avatars
+                        if (profileImage) {
+                            if (currentUser.avatarUrl && currentUser.avatarUrl !== "") {
+                                profileImage.src = currentUser.avatarUrl;
+                            } else {
+                                const name = currentUser.fullname || 'User';
+                                profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=f97316&color=fff&bold=true&size=32`;
+                            }
+                            // Handle image loading error (fallback to placeholder)
+                            profileImage.onerror = function() {
+                                this.src = 'https://ui-avatars.com/api/?name=User&background=f97316&color=fff&bold=true&size=32';
+                            };
+                        }
                     } else {
+                        // Token invalid
                         removeToken();
-                        document.getElementById('authButtons').style.display = 'flex';
-                        document.getElementById('profileContainer').style.display = 'none';
+                        if (authButtons) authButtons.style.display = 'flex';
+                        if (profileContainer) profileContainer.style.display = 'none';
                     }
-                } catch(e) {
+                } catch (err) {
+                    console.error("Auth check error:", err);
                     removeToken();
-                    document.getElementById('authButtons').style.display = 'flex';
-                    document.getElementById('profileContainer').style.display = 'none';
+                    if (authButtons) authButtons.style.display = 'flex';
+                    if (profileContainer) profileContainer.style.display = 'none';
                 }
             } else {
-                document.getElementById('authButtons').style.display = 'flex';
-                document.getElementById('profileContainer').style.display = 'none';
+                // No token: show login/signup buttons
+                if (authButtons) authButtons.style.display = 'flex';
+                if (profileContainer) profileContainer.style.display = 'none';
             }
         }
 

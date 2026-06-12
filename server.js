@@ -186,7 +186,7 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
-// ========== FORGOT PASSWORD – FIXED FOR RENDER ==========
+// ========== FORGOT PASSWORD – BREVO SMTP (WORKING ON RENDER) ==========
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -200,14 +200,18 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 
     const resetUrl = `https://vk698.github.io/vk-education/reset-password.html?token=${token}`;
 
-    // ✅ Using port 465 with SSL – more reliable on Render
+    // ✅ BREVO SMTP Configuration (works on Render free tier)
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+      port: process.env.SMTP_PORT || 587,
+      secure: false, // false for port 587 (STARTTLS)
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
       },
       connectionTimeout: 15000,
       greetingTimeout: 15000,
@@ -215,7 +219,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"StudyHub" <${process.env.EMAIL_USER}>`,
+      from: `"StudyHub" <${process.env.FROM_EMAIL}>`,
       to: user.email,
       subject: "StudyHub - Password Reset",
       html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>
