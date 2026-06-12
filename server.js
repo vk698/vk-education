@@ -4,8 +4,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 const multer = require("multer");
+const https = require("https");
+const { URL } = require("url");
 require("dotenv").config();
 
 const app = express();
@@ -19,7 +20,7 @@ mongoose.connect(process.env.MONGO_URI || "mongodb+srv://vishalkumar2257r_db_use
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// ==================== MODELS ====================
+// ==================== MODELS (unchanged) ====================
 const UserSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -186,7 +187,51 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
-// ========== FORGOT PASSWORD – BREVO SMTP (WORKING ON RENDER) ==========
+// ========== FORGOT PASSWORD – BREVO HTTP API (NO SMTP, NO TIMEOUT) ==========
+function sendBrevoEmail(apiKey, toEmail, subject, htmlContent, fromEmail) {
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify({
+      sender: { email: fromEmail, name: "StudyHub" },
+      to: [{ email: toEmail }],
+      subject: subject,
+      htmlContent: htmlContent
+    });
+
+    const options = {
+      hostname: "api.brevo.com",
+      path: "/v3/smtp/email",
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": apiKey,
+        "Content-Length": Buffer.byteLength(postData)
+      },
+      timeout: 10000
+    };
+
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", chunk => data += chunk);
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(`Brevo API error: ${res.statusCode} - ${data}`));
+        }
+      });
+    });
+
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("Request timeout"));
+    });
+    req.write(postData);
+    req.end();
+  });
+}
+
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -199,32 +244,16 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     await user.save();
 
     const resetUrl = `https://vk698.github.io/vk-education/reset-password.html?token=${token}`;
+    const htmlContent = `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>
+                         <p>If the button doesn't work, copy this link: ${resetUrl}</p>`;
 
-    // ✅ BREVO SMTP Configuration (works on Render free tier)
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-      port: process.env.SMTP_PORT || 587,
-      secure: false, // false for port 587 (STARTTLS)
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      },
-      tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
-      },
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000
-    });
-
-    await transporter.sendMail({
-      from: `"StudyHub" <${process.env.FROM_EMAIL}>`,
-      to: user.email,
-      subject: "StudyHub - Password Reset",
-      html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>
-             <p>If the button doesn't work, copy this link: ${resetUrl}</p>`
-    });
+    await sendBrevoEmail(
+      process.env.BREVO_API_KEY,
+      user.email,
+      "StudyHub - Password Reset",
+      htmlContent,
+      process.env.FROM_EMAIL
+    );
 
     res.json({ message: "Reset email sent" });
   } catch (error) {
