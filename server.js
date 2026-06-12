@@ -9,15 +9,17 @@ const multer = require("multer");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// ---------- MongoDB Connection ----------
+// Increase JSON payload limit to avoid PayloadTooLargeError
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// ---------- User Schema (matches StudyHub frontend) ----------
+// ---------- User Schema (complete) ----------
 const UserSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -40,9 +42,8 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", UserSchema);
 
-// ---------- Other StudyHub Models (keep your existing ones) ----------
-// Add your Course, CommunityPost, Group, Event schemas here...
-// (I'll include placeholders – copy your actual models from your existing server.js)
+// ---------- Other Models ----------
+// (keep your existing Course, CommunityPost, Group, Event schemas here – unchanged)
 const CourseSchema = new mongoose.Schema({
   title: String,
   description: String,
@@ -92,7 +93,7 @@ const EventSchema = new mongoose.Schema({
 });
 const Event = mongoose.model("Event", EventSchema);
 
-// ---------- Helper Middleware ----------
+// ---------- Helper ----------
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -107,7 +108,7 @@ const authenticateToken = (req, res, next) => {
 const storage = multer.memoryStorage();
 const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 
-// ---------- AUTH ROUTES (from iBlog, adapted for StudyHub) ----------
+// ---------- AUTH ROUTES ----------
 app.post("/api/auth/signup", async (req, res) => {
   try {
     const { fullname, email, password, grade, subjects } = req.body;
@@ -169,10 +170,22 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
       const mimeType = req.file.mimetype;
       updateData.avatarUrl = `data:${mimeType};base64,${base64}`;
     }
-    const user = await User.findByIdAndUpdate(req.user.userId, updateData, { new: true }).select("-password");
+    // Remove fields that shouldn't be updated directly
+    delete updateData._id;
+    delete updateData.password;
+    delete updateData.resetPasswordToken;
+    delete updateData.resetPasswordExpires;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: "Update failed" });
+    console.error("Update error:", error);
+    res.status(500).json({ error: error.message || "Update failed" });
   }
 });
 
@@ -221,10 +234,7 @@ app.post("/api/auth/reset-password", async (req, res) => {
   }
 });
 
-// ---------- Existing StudyHub Routes (courses, posts, groups, events) ----------
-// Copy your original routes from your StudyHub server.js here.
-// For brevity, I'll include placeholder endpoints – replace with your actual logic.
-
+// ---------- Other API routes (courses, posts, groups, events) ----------
 app.get("/api/courses", async (req, res) => {
   try {
     const courses = await Course.find().sort({ createdAt: -1 });
@@ -255,8 +265,6 @@ app.post("/api/posts", authenticateToken, async (req, res) => {
   }
 });
 
-// Add similar for groups, events, likes, comments as needed.
-
 app.get("/api/groups", async (req, res) => {
   try {
     const groups = await Group.find().sort({ createdAt: -1 });
@@ -275,7 +283,6 @@ app.get("/api/events", async (req, res) => {
   }
 });
 
-// Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });

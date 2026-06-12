@@ -64,22 +64,77 @@
       object-fit: cover;
       border: 3px solid var(--accent);
     }
-    .form-group {
-      margin-bottom: 1.2rem;
+    .detail-group {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--glass-border);
     }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.5rem;
+    .detail-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
     }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
+    .detail-group h3 {
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+    .detail-content p {
+      color: var(--text-dim);
+      margin-bottom: 0.2rem;
+    }
+    .edit-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: 0.2s;
+    }
+    .edit-btn:hover {
+      background: var(--accent);
       color: white;
-      font-family: inherit;
+    }
+    .edit-form {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 24px;
+    }
+    .edit-form input, .edit-form textarea, .edit-form select {
+      margin-bottom: 1rem;
+    }
+    .badges {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .badge {
+      background: rgba(249,115,22,0.2);
+      border: 1px solid var(--accent);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+    }
+    .progress-container {
+      margin-top: 1rem;
+    }
+    .progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s;
     }
     button {
       background: var(--accent);
@@ -94,23 +149,6 @@
     button:hover { background: var(--accent-light); transform: translateY(-2px); }
     .btn-secondary { background: #95a5a6; }
     .logout { margin-top: 2rem; text-align: center; }
-    .blogs-section {
-      margin-top: 2rem;
-      border-top: 1px solid var(--glass-border);
-      padding-top: 1.5rem;
-    }
-    .blog-item {
-      background: rgba(0,0,0,0.3);
-      border-radius: 20px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .blog-info h4 { color: var(--accent); margin-bottom: 5px; }
-    .delete-blog { background: #e74c3c; padding: 5px 12px; border-radius: 20px; }
     .toast {
       position: fixed; bottom: 20px; right: 20px; background: #2ecc71; padding: 12px 20px;
       border-radius: 40px; z-index: 2000; opacity: 0; transform: translateY(20px);
@@ -118,6 +156,9 @@
     }
     .toast.error { background: #e74c3c; }
     .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 768px) {
+      .profile-container { padding: 1.5rem; margin: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -141,29 +182,102 @@
     <div class="avatar">
       <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
     </div>
-    <form id="profileForm">
-      <div class="form-group">
-        <label>Profile Picture</label>
-        <input type="file" id="profilePicture" accept="image/*">
-      </div>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="name" required>
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="email" disabled style="background:#2d2d44;">
-      </div>
-      <div class="form-group">
-        <label>Bio</label>
-        <textarea id="bio" rows="4"></textarea>
-      </div>
-      <button type="submit">Update Profile</button>
-    </form>
 
-    <div class="blogs-section">
-      <h3><i class="fas fa-pen-nib"></i> My Blogs</h3>
-      <div id="myBlogsList">Loading...</div>
+    <!-- Account Settings (Avatar, Name, Grade) -->
+    <div class="detail-group">
+      <div class="detail-group-header">
+        <h3>Account Settings</h3>
+        <button class="edit-btn" onclick="toggleEdit('account')">Edit</button>
+      </div>
+      <div class="detail-content">
+        <p><strong>Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Email:</strong> <span id="displayEmail"></span></p>
+        <p><strong>Grade:</strong> <span id="displayGrade"></span></p>
+      </div>
+      <div class="edit-form" id="accountForm">
+        <div><label>Profile Picture</label><input type="file" id="avatarUpload" accept="image/*"></div>
+        <div><label>Full Name</label><input type="text" id="nameInput" placeholder="Full name"></div>
+        <div><label>Grade Level</label><select id="gradeSelect">
+          <option value="9">Grade 9</option><option value="10">Grade 10</option>
+          <option value="11">Grade 11</option><option value="12">Grade 12</option>
+          <option value="college">College</option>
+        </select></div>
+        <button class="edit-btn" onclick="saveAccountSettings()">Save</button>
+        <button class="edit-btn" style="border-color:#666;" onclick="toggleEdit('account')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- About Me -->
+    <div class="detail-group">
+      <div class="detail-group-header">
+        <h3>About Me</h3>
+        <button class="edit-btn" onclick="toggleEdit('about')">Edit</button>
+      </div>
+      <div class="detail-content"><p id="aboutText">No information provided.</p></div>
+      <div class="edit-form" id="aboutForm">
+        <textarea id="aboutInput" rows="3" placeholder="Tell us about yourself..."></textarea>
+        <button class="edit-btn" onclick="saveAbout()">Save</button>
+        <button class="edit-btn" style="border-color:#666;" onclick="toggleEdit('about')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Subjects of Interest -->
+    <div class="detail-group">
+      <div class="detail-group-header">
+        <h3>Subjects of Interest</h3>
+        <button class="edit-btn" onclick="toggleEdit('subjects')">Edit</button>
+      </div>
+      <div class="detail-content"><p id="subjectsText">Not specified.</p></div>
+      <div class="edit-form" id="subjectsForm">
+        <input type="text" id="subjectsInput" placeholder="e.g., Math, Physics, Programming">
+        <button class="edit-btn" onclick="saveSubjects()">Save</button>
+        <button class="edit-btn" style="border-color:#666;" onclick="toggleEdit('subjects')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Education -->
+    <div class="detail-group">
+      <div class="detail-group-header">
+        <h3>Education</h3>
+        <button class="edit-btn" onclick="toggleEdit('education')">Edit</button>
+      </div>
+      <div class="detail-content">
+        <p id="schoolText">Not specified</p>
+        <p id="gpaText"></p>
+      </div>
+      <div class="edit-form" id="educationForm">
+        <input type="text" id="schoolInput" placeholder="School/University">
+        <input type="text" id="yearsInput" placeholder="Years attended">
+        <input type="text" id="gpaInput" placeholder="GPA">
+        <button class="edit-btn" onclick="saveEducation()">Save</button>
+        <button class="edit-btn" style="border-color:#666;" onclick="toggleEdit('education')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Social Links -->
+    <div class="detail-group">
+      <div class="detail-group-header">
+        <h3>Social Links</h3>
+        <button class="edit-btn" onclick="toggleEdit('social')">Edit</button>
+      </div>
+      <div class="detail-content" id="socialLinksDisplay">No social links added.</div>
+      <div class="edit-form" id="socialForm">
+        <input type="text" id="githubInput" placeholder="GitHub URL">
+        <input type="text" id="linkedinInput" placeholder="LinkedIn URL">
+        <input type="text" id="twitterInput" placeholder="Twitter URL">
+        <button class="edit-btn" onclick="saveSocial()">Save</button>
+        <button class="edit-btn" style="border-color:#666;" onclick="toggleEdit('social')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Badges & Progress -->
+    <div class="detail-group">
+      <h3>Badges & Achievements</h3>
+      <div class="badges" id="badgesContainer"></div>
+      <div class="progress-container">
+        <div class="progress-text">Profile completion: <span id="completionPercent">0</span>%</div>
+        <div class="progress-bar"><div class="progress-fill" id="completionFill"></div></div>
+      </div>
     </div>
 
     <div class="logout">
@@ -195,11 +309,7 @@
         const user = await res.json();
         if (res.ok) {
           currentUser = user;
-          document.getElementById('name').value = user.fullname;
-          document.getElementById('email').value = user.email;
-          document.getElementById('bio').value = user.about || '';
-          if (user.avatarUrl) document.getElementById('profileImg').src = user.avatarUrl;
-          loadMyBlogs(user._id);
+          renderProfile(user);
         } else {
           showToast('Session expired. Please login again.', true);
           localStorage.clear();
@@ -208,76 +318,131 @@
       } catch (err) { console.error(err); }
     }
 
-    async function loadMyBlogs(userId) {
-      const container = document.getElementById('myBlogsList');
+    function renderProfile(user) {
+      document.getElementById('displayName').innerText = user.fullname || '—';
+      document.getElementById('displayEmail').innerText = user.email;
+      document.getElementById('displayGrade').innerText = user.grade ? `Grade ${user.grade}` : 'Not set';
+      document.getElementById('nameInput').value = user.fullname || '';
+      document.getElementById('gradeSelect').value = user.grade || '12';
+      if (user.avatarUrl) document.getElementById('profileImg').src = user.avatarUrl;
+      document.getElementById('aboutText').innerText = user.about || 'No information provided.';
+      document.getElementById('aboutInput').value = user.about || '';
+      const subjectsStr = Array.isArray(user.subjects) ? user.subjects.join(', ') : (user.subjects || '');
+      document.getElementById('subjectsText').innerText = subjectsStr || 'Not specified.';
+      document.getElementById('subjectsInput').value = subjectsStr;
+      document.getElementById('schoolText').innerHTML = user.school ? `${user.school} ${user.years ? '('+user.years+')' : ''}` : 'Not specified';
+      document.getElementById('gpaText').innerHTML = user.gpa ? `GPA: ${user.gpa}/4.0` : '';
+      document.getElementById('schoolInput').value = user.school || '';
+      document.getElementById('yearsInput').value = user.years || '';
+      document.getElementById('gpaInput').value = user.gpa || '';
+      const social = user.social || {};
+      const socialHtml = [];
+      if (social.github) socialHtml.push(`<a href="${social.github}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-github"></i> GitHub</a>`);
+      if (social.linkedin) socialHtml.push(`<a href="${social.linkedin}" target="_blank" style="color:var(--accent); margin-right:1rem;"><i class="fab fa-linkedin"></i> LinkedIn</a>`);
+      if (social.twitter) socialHtml.push(`<a href="${social.twitter}" target="_blank" style="color:var(--accent);"><i class="fab fa-twitter"></i> Twitter</a>`);
+      document.getElementById('socialLinksDisplay').innerHTML = socialHtml.length ? socialHtml.join(' ') : 'No social links added.';
+      document.getElementById('githubInput').value = social.github || '';
+      document.getElementById('linkedinInput').value = social.linkedin || '';
+      document.getElementById('twitterInput').value = social.twitter || '';
+      const badgesContainer = document.getElementById('badgesContainer');
+      badgesContainer.innerHTML = '';
+      if (user.badges && user.badges.length) {
+        user.badges.forEach(b => { const span = document.createElement('span'); span.className = 'badge'; span.innerText = b; badgesContainer.appendChild(span); });
+      } else {
+        badgesContainer.innerHTML = '<span class="badge">New Member</span>';
+      }
+      let completion = 0;
+      if (user.fullname) completion++;
+      if (user.about) completion++;
+      if (user.subjects && user.subjects.length) completion++;
+      if (user.school) completion++;
+      if (user.gpa) completion++;
+      if (user.avatarUrl) completion++;
+      if (social.github || social.linkedin || social.twitter) completion++;
+      const percent = Math.round((completion / 7) * 100);
+      document.getElementById('completionPercent').innerText = percent;
+      document.getElementById('completionFill').style.width = `${percent}%`;
+    }
+
+    async function updateUser(data, isFormData = false) {
+      let options = {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      };
+      if (isFormData) {
+        options.body = data;
+      } else {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(data);
+      }
       try {
-        const res = await fetch(`${API_BASE}/api/blog/user/${userId}`);
-        const blogs = await res.json();
-        if (blogs.length === 0) {
-          container.innerHTML = '<p>No blogs yet. <a href="create-blog.html">Create your first blog</a>.</p>';
-          return;
+        const res = await fetch(`${API_BASE}/api/auth/update`, options);
+        const updated = await res.json();
+        if (res.ok) {
+          currentUser = updated;
+          localStorage.setItem('studyhub_user', JSON.stringify(updated));
+          renderProfile(updated);
+          showToast('Profile updated!');
+          return true;
+        } else {
+          showToast(updated.error || 'Update failed', true);
+          return false;
         }
-        container.innerHTML = '';
-        blogs.forEach(blog => {
-          const div = document.createElement('div');
-          div.className = 'blog-item';
-          div.innerHTML = `
-            <div class="blog-info">
-              <h4>${escapeHtml(blog.title)}</h4>
-              <p>${escapeHtml(blog.content.substring(0, 100))}...</p>
-              <small>${new Date(blog.createdAt).toLocaleDateString()}</small>
-            </div>
-            <button class="delete-blog" data-id="${blog._id}"><i class="fas fa-trash"></i> Delete</button>
-          `;
-          container.appendChild(div);
-        });
-        document.querySelectorAll('.delete-blog').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            if (confirm('Delete this blog?')) {
-              await deleteBlog(btn.getAttribute('data-id'));
-              loadMyBlogs(userId);
-            }
-          });
-        });
       } catch (err) {
-        container.innerHTML = '<p>Error loading blogs.</p>';
+        showToast('Server error', true);
+        return false;
       }
     }
 
-    async function deleteBlog(blogId) {
-      try {
-        const res = await fetch(`${API_BASE}/api/blog/${blogId}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) alert('Delete failed');
-      } catch (err) { alert('Error deleting'); }
-    }
-
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fullname = document.getElementById('name').value;
-      const about = document.getElementById('bio').value;
-      const fileInput = document.getElementById('profilePicture');
+    async function saveAccountSettings() {
+      const fullname = document.getElementById('nameInput').value.trim();
+      const grade = document.getElementById('gradeSelect').value;
+      const fileInput = document.getElementById('avatarUpload');
       const formData = new FormData();
       formData.append('fullname', fullname);
-      formData.append('about', about);
-      if (fileInput.files[0]) formData.append('avatarUrl', fileInput.files[0]);
+      formData.append('grade', grade);
+      if (fileInput.files[0]) {
+        formData.append('avatarUrl', fileInput.files[0]);
+      }
+      const success = await updateUser(formData, true);
+      if (success) toggleEdit('account');
+    }
 
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/update`, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-        const updatedUser = await res.json();
-        if (res.ok) {
-          localStorage.setItem('studyhub_user', JSON.stringify(updatedUser));
-          if (updatedUser.avatarUrl) document.getElementById('profileImg').src = updatedUser.avatarUrl;
-          showToast('Profile updated!');
-        } else showToast(updatedUser.error || 'Update failed', true);
-      } catch (err) { showToast('Error updating profile', true); }
-    });
+    async function saveAbout() {
+      const about = document.getElementById('aboutInput').value;
+      const success = await updateUser({ about });
+      if (success) toggleEdit('about');
+    }
+
+    async function saveSubjects() {
+      const subjectsRaw = document.getElementById('subjectsInput').value;
+      const subjects = subjectsRaw.split(',').map(s => s.trim()).filter(s => s);
+      const success = await updateUser({ subjects });
+      if (success) toggleEdit('subjects');
+    }
+
+    async function saveEducation() {
+      const school = document.getElementById('schoolInput').value;
+      const years = document.getElementById('yearsInput').value;
+      const gpa = document.getElementById('gpaInput').value;
+      const success = await updateUser({ school, years, gpa });
+      if (success) toggleEdit('education');
+    }
+
+    async function saveSocial() {
+      const social = {
+        github: document.getElementById('githubInput').value,
+        linkedin: document.getElementById('linkedinInput').value,
+        twitter: document.getElementById('twitterInput').value
+      };
+      const success = await updateUser({ social });
+      if (success) toggleEdit('social');
+    }
+
+    function toggleEdit(section) {
+      const form = document.getElementById(`${section}Form`);
+      if (form) form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    }
 
     function logout() {
       localStorage.clear();
@@ -287,16 +452,6 @@
     document.getElementById('logoutBtn').onclick = logout;
     document.getElementById('logoutBtn2').onclick = logout;
     document.getElementById('closeProfileBtn').onclick = () => window.location.href = 'index.html';
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      });
-    }
 
     loadProfile();
   </script>

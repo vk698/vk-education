@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/vk698/vk-education#readme",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
