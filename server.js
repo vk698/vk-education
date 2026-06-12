@@ -186,7 +186,7 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
-// ========== FORGOT PASSWORD (IPv4 fixed - iBlog style) ==========
+// ========== FORGOT PASSWORD – FIXED FOR RENDER ==========
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -200,15 +200,18 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 
     const resetUrl = `https://vk698.github.io/vk-education/reset-password.html?token=${token}`;
 
-    // ✅ IPv4 fix: explicit host, port 587, secure false
+    // ✅ Using port 465 with SSL – more reliable on Render
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-      }
+      },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000
     });
 
     await transporter.sendMail({
