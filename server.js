@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require("nodemailer");
 const multer = require("multer");
 require("dotenv").config();
 
@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB Connection (आपका मौजूदा कनेक्शन स्ट्रिंग)
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI || "mongodb+srv://vishalkumar2257r_db_user:oPKxmiOQQF09554e@cluster0.pmyxiym.mongodb.net/myDatabase")
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
@@ -186,7 +186,7 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
-// ===== FORGOT PASSWORD (EXACT iBlog STYLE with your GitHub URL) =====
+// ========== FORGOT PASSWORD (Nodemailer / iBlog style) ==========
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -199,17 +199,23 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     await user.save();
 
     const resetUrl = `https://vk698.github.io/vk-education/reset-password.html?token=${token}`;
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    const msg = {
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"StudyHub" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      from: process.env.FROM_EMAIL,
       subject: "StudyHub - Password Reset",
-      text: `Reset link: ${resetUrl}`,
       html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>
-             <p>If the button doesn't work, copy and paste this link into your browser:</p>
-             <p>${resetUrl}</p>`
-    };
-    await sgMail.send(msg);
+             <p>If the button doesn't work, copy this link: ${resetUrl}</p>`
+    });
+
     res.json({ message: "Reset email sent" });
   } catch (error) {
     console.error("Forgot password error:", error);
