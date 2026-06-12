@@ -10,26 +10,71 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     }
+
     :root {
       --accent: #f97316;
       --accent-light: #ff9f4a;
+      --accent-glow: rgba(249, 115, 22, 0.3);
       --text-light: #f8fafc;
       --text-dim: #cbd5e1;
-      --glass-border: rgba(255,255,255,0.1);
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      --transition-smooth: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
+
     body {
-      background: #0a0f1c;
+      background: radial-gradient(circle at 20% 30%, #0f172a, #030712);
       color: var(--text-light);
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
+
+    /* 3D floating particles effect (pure CSS) */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 40%, rgba(249,115,22,0.08) 2px, transparent 2px),
+        radial-gradient(circle at 80% 70%, rgba(249,115,22,0.05) 1px, transparent 1px);
+      background-size: 50px 50px, 80px 80px;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    /* animated gradient orb */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(249,115,22,0.15), transparent 70%);
+      animation: rotateGlow 25s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes rotateGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     header {
       position: sticky;
       top: 0;
       z-index: 1000;
       backdrop-filter: blur(16px);
-      background: rgba(10,15,28,0.7);
+      background: rgba(10, 15, 28, 0.75);
       border-bottom: 1px solid var(--glass-border);
       padding: 0.8rem 2rem;
       display: flex;
@@ -37,105 +82,44 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
-    .logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1.8rem; font-weight: 800; }
-    .logo i { color: var(--accent); font-size: 2rem; }
-    .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
-    nav { display: flex; gap: 1.2rem; }
-    nav a { color: var(--text-dim); text-decoration: none; font-weight: 500; }
-    nav a:hover { color: var(--accent); }
-    .profile-container {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(15,23,42,0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 32px;
-    }
-    .avatar {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    .avatar img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--accent);
-    }
-    .detail-group {
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--glass-border);
-    }
-    .detail-group-header {
+
+    .logo {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.8rem;
+      gap: 0.6rem;
+      font-size: 1.8rem;
+      font-weight: 800;
+      transition: transform 0.2s;
     }
-    .detail-group h3 {
-      font-size: 1.2rem;
-      color: var(--accent);
-    }
-    .detail-content p {
+    .logo:hover { transform: scale(1.02); }
+    .logo i { color: var(--accent); font-size: 2rem; filter: drop-shadow(0 0 4px var(--accent-glow)); }
+    .logo span { background: linear-gradient(120deg, #fff, var(--accent)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+
+    nav { display: flex; gap: 1.5rem; }
+    nav a {
       color: var(--text-dim);
-      margin-bottom: 0.2rem;
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.2s;
+      padding: 0.2rem 0;
     }
-    .edit-btn {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 0.3rem 1rem;
-      border-radius: 40px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: 0.2s;
-    }
-    .edit-btn:hover {
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
       background: var(--accent);
-      color: white;
+      transition: width 0.25s ease;
+      border-radius: 2px;
     }
-    .edit-form {
-      display: none;
-      margin-top: 1rem;
-      padding: 1rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 24px;
-    }
-    .edit-form input, .edit-form textarea, .edit-form select {
-      margin-bottom: 1rem;
-    }
-    .badges {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-      margin-top: 0.5rem;
-    }
-    .badge {
-      background: rgba(249,115,22,0.2);
-      border: 1px solid var(--accent);
-      padding: 0.3rem 1rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-    }
-    .progress-container {
-      margin-top: 1rem;
-    }
-    .progress-bar {
-      height: 8px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 0.5rem;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.5s;
-    }
+    nav a:hover::after, nav a.active::after { width: 100%; }
+    nav a:hover { color: var(--accent); }
+
     button {
       background: var(--accent);
       color: white;
@@ -143,21 +127,310 @@
       padding: 10px 24px;
       border-radius: 40px;
       cursor: pointer;
-      margin-right: 10px;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(249,115,22,0.3);
+    }
+    button:active { transform: translateY(1px); }
+
+    .profile-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 48px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      animation: fadeSlideUp 0.6s ease-out;
+    }
+    .profile-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border-color: rgba(249,115,22,0.3);
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .avatar {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .avatar img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--accent);
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.3), 0 10px 25px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+    .avatar img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 0 6px rgba(249,115,22,0.5);
+    }
+
+    .detail-group {
+      margin-top: 1.8rem;
+      padding-top: 1.8rem;
+      border-top: 1px solid var(--glass-border);
+      transition: background 0.2s;
+      border-radius: 24px;
+      padding: 1.2rem;
+    }
+    .detail-group:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .detail-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .detail-group h3 {
+      font-size: 1.3rem;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .detail-group h3 i {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    .detail-content p {
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .edit-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: none;
+    }
+    .edit-btn:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+    }
+
+    /* Enhanced Edit Forms */
+    .edit-form {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .edit-form label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+    .edit-form input, 
+    .edit-form textarea, 
+    .edit-form select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      color: white;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      margin-bottom: 1.2rem;
+      outline: none;
+    }
+    .edit-form input:focus,
+    .edit-form textarea:focus,
+    .edit-form select:focus {
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.12);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.2);
+    }
+    .edit-form textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .edit-form button {
+      margin-right: 12px;
+      padding: 8px 20px;
+      background: var(--accent);
+    }
+    .edit-form button:last-child {
+      background: #334155;
+    }
+    .edit-form button:last-child:hover {
+      background: #475569;
+    }
+
+    /* Badges with 3D pop */
+    .badges {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.8rem;
+    }
+    .badge {
+      background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(249,115,22,0.05));
+      border: 1px solid var(--accent);
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .badge:hover {
+      transform: translateY(-2px);
+      background: rgba(249,115,22,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Progress bar with glow */
+    .progress-container {
+      margin-top: 1.5rem;
+    }
+    .progress-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 0.97, 0.36, 1.05);
+      border-radius: 10px;
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    /* Social links styling */
+    .detail-content a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .detail-content a:hover {
+      color: white;
+      text-shadow: 0 0 5px var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #2ecc71;
+      backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-weight: 500;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      border-left: 4px solid white;
+    }
+    .toast.error {
+      background: #e74c3c;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header { padding: 0.8rem 1rem; }
+      .profile-container { padding: 1.2rem; margin: 1rem; border-radius: 32px; }
+      h2 { font-size: 1.6rem; }
+      .detail-group h3 { font-size: 1.1rem; }
+      .edit-form { padding: 1rem; }
+      nav { gap: 0.8rem; }
+    }
+
+    /* custom file input styling */
+    input[type="file"] {
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem;
+      border-radius: 40px;
+      color: var(--text-dim);
+    }
+    input[type="file"]::file-selector-button {
+      background: var(--accent);
+      border: none;
+      border-radius: 40px;
+      padding: 5px 12px;
+      color: white;
+      cursor: pointer;
       transition: 0.2s;
     }
-    button:hover { background: var(--accent-light); transform: translateY(-2px); }
-    .btn-secondary { background: #95a5a6; }
-    .logout { margin-top: 2rem; text-align: center; }
-    .toast {
-      position: fixed; bottom: 20px; right: 20px; background: #2ecc71; padding: 12px 20px;
-      border-radius: 40px; z-index: 2000; opacity: 0; transform: translateY(20px);
-      transition: 0.3s; pointer-events: none;
+    input[type="file"]::file-selector-button:hover {
+      background: var(--accent-light);
+      transform: scale(0.97);
     }
-    .toast.error { background: #e74c3c; }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    @media (max-width: 768px) {
-      .profile-container { padding: 1.5rem; margin: 1rem; }
+
+    /* Loading skeleton animation (optional) */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
     }
   </style>
 </head>
@@ -176,9 +449,9 @@
 
   <div class="profile-container">
     <div style="display: flex; justify-content: flex-end;">
-      <button id="closeProfileBtn" style="background:#7f8c8d;"><i class="fas fa-times"></i> Close</button>
+      <button id="closeProfileBtn" style="background:#475569;"><i class="fas fa-times"></i> Close</button>
     </div>
-    <h2 style="color:var(--accent);">My Profile</h2>
+    <h2><i class="fas fa-user-astronaut"></i> My Profile</h2>
     <div class="avatar">
       <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile">
     </div>
@@ -186,7 +459,7 @@
     <!-- Account Settings (Avatar, Name, Grade) -->
     <div class="detail-group">
       <div class="detail-group-header">
-        <h3>Account Settings</h3>
+        <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
         <button class="edit-btn" onclick="toggleEdit('account')">Edit</button>
       </div>
       <div class="detail-content">
@@ -210,7 +483,7 @@
     <!-- About Me -->
     <div class="detail-group">
       <div class="detail-group-header">
-        <h3>About Me</h3>
+        <h3><i class="fas fa-address-card"></i> About Me</h3>
         <button class="edit-btn" onclick="toggleEdit('about')">Edit</button>
       </div>
       <div class="detail-content"><p id="aboutText">No information provided.</p></div>
@@ -224,7 +497,7 @@
     <!-- Subjects of Interest -->
     <div class="detail-group">
       <div class="detail-group-header">
-        <h3>Subjects of Interest</h3>
+        <h3><i class="fas fa-book-open"></i> Subjects of Interest</h3>
         <button class="edit-btn" onclick="toggleEdit('subjects')">Edit</button>
       </div>
       <div class="detail-content"><p id="subjectsText">Not specified.</p></div>
@@ -238,7 +511,7 @@
     <!-- Education -->
     <div class="detail-group">
       <div class="detail-group-header">
-        <h3>Education</h3>
+        <h3><i class="fas fa-graduation-cap"></i> Education</h3>
         <button class="edit-btn" onclick="toggleEdit('education')">Edit</button>
       </div>
       <div class="detail-content">
@@ -257,7 +530,7 @@
     <!-- Social Links -->
     <div class="detail-group">
       <div class="detail-group-header">
-        <h3>Social Links</h3>
+        <h3><i class="fas fa-share-alt"></i> Social Links</h3>
         <button class="edit-btn" onclick="toggleEdit('social')">Edit</button>
       </div>
       <div class="detail-content" id="socialLinksDisplay">No social links added.</div>
@@ -272,7 +545,7 @@
 
     <!-- Badges & Progress -->
     <div class="detail-group">
-      <h3>Badges & Achievements</h3>
+      <h3><i class="fas fa-medal"></i> Badges & Achievements</h3>
       <div class="badges" id="badgesContainer"></div>
       <div class="progress-container">
         <div class="progress-text">Profile completion: <span id="completionPercent">0</span>%</div>
@@ -288,7 +561,7 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const API_BASE = "https://studyhub-backend-f15o.onrender.com"; // CHANGE to your backend URL
+    const API_BASE = "https://studyhub-backend-f15o.onrender.com";
     const token = localStorage.getItem('studyhub_token');
     if (!token) window.location.href = 'login.html';
 
@@ -353,7 +626,7 @@
       }
       let completion = 0;
       if (user.fullname) completion++;
-      if (user.about) completion++;
+      if (user.about && user.about.length > 0) completion++;
       if (user.subjects && user.subjects.length) completion++;
       if (user.school) completion++;
       if (user.gpa) completion++;

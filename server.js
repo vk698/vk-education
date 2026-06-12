@@ -10,16 +10,16 @@ require("dotenv").config();
 
 const app = express();
 
-// Increase JSON payload limit to avoid PayloadTooLargeError
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-mongoose.connect(process.env.MONGO_URI)
+// MongoDB Connection (आपका मौजूदा कनेक्शन स्ट्रिंग)
+mongoose.connect(process.env.MONGO_URI || "mongodb+srv://vishalkumar2257r_db_user:oPKxmiOQQF09554e@cluster0.pmyxiym.mongodb.net/myDatabase")
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-// ---------- User Schema (complete) ----------
+// ==================== MODELS ====================
 const UserSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -42,8 +42,6 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", UserSchema);
 
-// ---------- Other Models ----------
-// (keep your existing Course, CommunityPost, Group, Event schemas here – unchanged)
 const CourseSchema = new mongoose.Schema({
   title: String,
   description: String,
@@ -93,7 +91,7 @@ const EventSchema = new mongoose.Schema({
 });
 const Event = mongoose.model("Event", EventSchema);
 
-// ---------- Helper ----------
+// ==================== HELPERS ====================
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -108,7 +106,7 @@ const authenticateToken = (req, res, next) => {
 const storage = multer.memoryStorage();
 const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 
-// ---------- AUTH ROUTES ----------
+// ==================== AUTH ROUTES ====================
 app.post("/api/auth/signup", async (req, res) => {
   try {
     const { fullname, email, password, grade, subjects } = req.body;
@@ -170,7 +168,6 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
       const mimeType = req.file.mimetype;
       updateData.avatarUrl = `data:${mimeType};base64,${base64}`;
     }
-    // Remove fields that shouldn't be updated directly
     delete updateData._id;
     delete updateData.password;
     delete updateData.resetPasswordToken;
@@ -189,29 +186,34 @@ app.put("/api/auth/update", authenticateToken, upload.single("avatarUrl"), async
   }
 });
 
+// ===== FORGOT PASSWORD (EXACT iBlog STYLE with your GitHub URL) =====
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: "No account with that email" });
+
     const token = crypto.randomBytes(32).toString("hex");
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-    const resetUrl = `https://your-frontend-domain.com/reset-password.html?token=${token}`; // CHANGE to your actual frontend URL
+
+    const resetUrl = `https://vk698.github.io/vk-education/reset-password.html?token=${token}`;
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to: user.email,
       from: process.env.FROM_EMAIL,
       subject: "StudyHub - Password Reset",
       text: `Reset link: ${resetUrl}`,
-      html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>`
+      html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. Link expires in 1 hour.</p>
+             <p>If the button doesn't work, copy and paste this link into your browser:</p>
+             <p>${resetUrl}</p>`
     };
     await sgMail.send(msg);
     res.json({ message: "Reset email sent" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to send reset email" });
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: error.message || "Failed to send reset email" });
   }
 });
 
@@ -234,7 +236,7 @@ app.post("/api/auth/reset-password", async (req, res) => {
   }
 });
 
-// ---------- Other API routes (courses, posts, groups, events) ----------
+// ==================== OTHER API ROUTES ====================
 app.get("/api/courses", async (req, res) => {
   try {
     const courses = await Course.find().sort({ createdAt: -1 });
